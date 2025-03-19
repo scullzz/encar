@@ -6,9 +6,30 @@ import SubscriptionPage from "./pages/subPage/SubscriptionPage";
 import ContactsPage from "./pages/contractPage/ContactsPage";
 import Navigation from "./Navigation";
 import AddNewRequest from "./pages/addNewRequest/AddNewRequest";
+import { useEffect } from "react";
 
 function App() {
   useTelegramWebAppInit();
+  const getUser = async () => {
+    try {
+      const response = await fetch("https://api.a-b-d.ru/test-telegram-auth", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `test_token`,
+        },
+      });
+
+      const res = await response.json();
+      console.log(res);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  useEffect(() => {
+    getUser();
+  }, []);
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
