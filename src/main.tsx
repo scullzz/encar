@@ -7,8 +7,7 @@ import App from "./components/App";
 import "./index.css";
 
 const theme = createTheme({
-  // можно переопределить palette / typography и т.д.
-  // palette: { primary: { main: '#1976d2' }, }
+  palette: { primary: { main: "#1976d2" } },
 });
 
 ReactDOM.createRoot(document.getElementById("root")!).render(

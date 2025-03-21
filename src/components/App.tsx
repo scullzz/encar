@@ -16,7 +16,7 @@ function App() {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `test_token`,
+          auth: `123`,
         },
       });
 

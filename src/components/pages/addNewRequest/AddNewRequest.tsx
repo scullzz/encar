@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   FormControl,
   InputLabel,
@@ -7,17 +7,304 @@ import {
   Button,
   Box,
   SelectChangeEvent,
+  TextField,
 } from "@mui/material";
 
 interface Values {
-  [key: string]: string;
+  [key: string]: string; // Всё храним как строки, включая даты
+}
+
+interface IReferenceItem {
+  id: number;
+  name: string;
+  translated: string;
 }
 
 export default function FilterComponent() {
   const [values, setValues] = useState<Values>({});
 
-  const handleChange = (event: SelectChangeEvent<string>, name: string) => {
-    setValues((prev) => ({ ...prev, [name]: event.target.value as string }));
+  // Списки для селектов
+  const [manufactury, setManufactury] = useState<IReferenceItem[]>([]);
+  const [model, setModel] = useState<IReferenceItem[]>([]);
+  const [series, setSeries] = useState<IReferenceItem[]>([]);
+  const [complectation, setComplectation] = useState<IReferenceItem[]>([]);
+  const [engine, setEngine] = useState<IReferenceItem[]>([]);
+  const [drive, setDrive] = useState<IReferenceItem[]>([]);
+  const [color, setColor] = useState<IReferenceItem[]>([]);
+
+  // =========== FETCH ФУНКЦИИ ============
+  const getManufacturers = async () => {
+    try {
+      const response = await fetch(
+        "https://api.a-b-d.ru/references/manufactury",
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            auth: "123",
+          },
+        }
+      );
+      const res = await response.json();
+      setManufactury(res);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const getModel = async (manufacturyId: number) => {
+    try {
+      const response = await fetch(
+        `https://api.a-b-d.ru/references/model/${manufacturyId}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            auth: "123",
+          },
+        }
+      );
+      const res = await response.json();
+      setModel(res);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const getSeriece = async (modelId: number) => {
+    try {
+      const response = await fetch(
+        `https://api.a-b-d.ru/references/series/${modelId}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            auth: "123",
+          },
+        }
+      );
+      const res = await response.json();
+      setSeries(res);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const getComplectation = async (seriesId: number) => {
+    try {
+      const response = await fetch(
+        `https://api.a-b-d.ru/references/equipment/${seriesId}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            auth: "123",
+          },
+        }
+      );
+      const res = await response.json();
+      setComplectation(res);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const getEngine = async () => {
+    try {
+      const response = await fetch(
+        `https://api.a-b-d.ru/references/engineType`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            auth: "123",
+          },
+        }
+      );
+      const res = await response.json();
+      setEngine(res);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const getDrive = async () => {
+    try {
+      const response = await fetch(
+        `https://api.a-b-d.ru/references/driveType`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            auth: "123",
+          },
+        }
+      );
+      const res = await response.json();
+      setDrive(res);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const getColor = async () => {
+    try {
+      const response = await fetch(`https://api.a-b-d.ru/references/carColor`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          auth: "123",
+        },
+      });
+      const res = await response.json();
+      setColor(res);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  // Подгружаем часть справочников при первом рендере
+  useEffect(() => {
+    getManufacturers();
+    getEngine();
+    getDrive();
+    getColor();
+  }, []);
+
+  // =========== ОБРАБОТЧИК SELECT'ОВ ============
+  const handleChange = async (
+    event: SelectChangeEvent<string>,
+    field: string
+  ) => {
+    const selectedId = event.target.value; // строка
+
+    // Записываем новое значение в values
+    setValues((prev) => ({
+      ...prev,
+      [field]: selectedId,
+    }));
+
+    // Логика цепочек:
+    switch (field) {
+      case "Производитель":
+        if (selectedId) {
+          await getModel(Number(selectedId)); // переводим строку в number
+          // Сбрасываем связанные поля
+          setValues((prev) => ({
+            ...prev,
+            Модель: "",
+            Серия: "",
+            Комплектация: "",
+            [field]: selectedId,
+          }));
+          setModel([]);
+          setSeries([]);
+          setComplectation([]);
+        } else {
+          setModel([]);
+          setSeries([]);
+          setComplectation([]);
+        }
+        break;
+
+      case "Модель":
+        if (!values["Производитель"]) {
+          alert("Сначала выберите производителя");
+          setValues((prev) => ({ ...prev, Модель: "" }));
+          return;
+        }
+        if (selectedId) {
+          await getSeriece(Number(selectedId));
+          setValues((prev) => ({
+            ...prev,
+            Серия: "",
+            Комплектация: "",
+            [field]: selectedId,
+          }));
+          setSeries([]);
+          setComplectation([]);
+        } else {
+          setSeries([]);
+          setComplectation([]);
+        }
+        break;
+
+      case "Серия":
+        if (!values["Модель"]) {
+          alert("Сначала выберите модель");
+          setValues((prev) => ({ ...prev, Серия: "" }));
+          return;
+        }
+        if (selectedId) {
+          await getComplectation(Number(selectedId));
+          setValues((prev) => ({
+            ...prev,
+            Комплектация: "",
+            [field]: selectedId,
+          }));
+          setComplectation([]);
+        } else {
+          setComplectation([]);
+        }
+        break;
+
+      default:
+        break;
+    }
+  };
+
+  const handleDateChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+    field: string
+  ) => {
+    setValues((prev) => ({
+      ...prev,
+      [field]: e.target.value, // строка
+    }));
+  };
+
+  const handleSave = async () => {
+    const payload = {
+      user_id: 123,
+      manufacture_id: Number(values["Производитель"] || 0),
+      model_id: Number(values["Модель"] || 0),
+      series_id: Number(values["Серия"] || 0),
+      equipment_id: Number(values["Комплектация"] || 0),
+      engine_type_id: Number(values["Двигатель"] || 0),
+      drive_type_id: Number(values["Привод"] || 0),
+      car_color_id: Number(values["Цвет кузова"] || 0),
+      mileage_from: Number(values["Пробег от (км)"] || 0),
+      mileage_defore: Number(values["Пробег до (км)"] || 0),
+      price_from: Number(values["Цена от ₩"] || 0),
+      price_defore: Number(values["Цена до ₩"] || 0),
+
+      date_release_from: values["date_release_from"]
+        ? new Date(values["date_release_from"]).toISOString()
+        : null,
+      date_release_defor: values["date_release_defor"]
+        ? new Date(values["date_release_defor"]).toISOString()
+        : null,
+    };
+
+    try {
+      const response = await fetch("https://api.a-b-d.ru/filter/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          auth: "123",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Ошибка запроса: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+      console.log("Успешно сохранён фильтр:", result);
+    } catch (err) {
+      console.error("Ошибка при сохранении фильтра", err);
+    }
   };
 
   return (
@@ -31,6 +318,7 @@ export default function FilterComponent() {
         backgroundColor: "#f5f5f5",
       }}
     >
+      {/* Производитель */}
       <FormControl fullWidth>
         <InputLabel>Производитель</InputLabel>
         <Select
@@ -38,22 +326,28 @@ export default function FilterComponent() {
           onChange={(e) => handleChange(e, "Производитель")}
           sx={{ borderRadius: "16px" }}
         >
-          <MenuItem value="Toyota">Toyota</MenuItem>
-          <MenuItem value="BMW">BMW</MenuItem>
-          <MenuItem value="Audi">Audi</MenuItem>
+          {manufactury.map((item) => (
+            <MenuItem key={item.id} value={String(item.id)}>
+              {item.translated || item.name}
+            </MenuItem>
+          ))}
         </Select>
       </FormControl>
 
+      {/* Модель */}
       <FormControl fullWidth>
         <InputLabel>Модель</InputLabel>
         <Select
+          disabled={!values["Производитель"]}
           value={values["Модель"] || ""}
           onChange={(e) => handleChange(e, "Модель")}
           sx={{ borderRadius: "16px" }}
         >
-          <MenuItem value="Corolla">Corolla</MenuItem>
-          <MenuItem value="X5">X5</MenuItem>
-          <MenuItem value="A6">A6</MenuItem>
+          {model.map((item) => (
+            <MenuItem key={item.id} value={String(item.id)}>
+              {item.translated || item.name}
+            </MenuItem>
+          ))}
         </Select>
       </FormControl>
 
@@ -61,13 +355,16 @@ export default function FilterComponent() {
       <FormControl fullWidth>
         <InputLabel>Серия</InputLabel>
         <Select
+          disabled={!values["Модель"]}
           value={values["Серия"] || ""}
           onChange={(e) => handleChange(e, "Серия")}
           sx={{ borderRadius: "16px" }}
         >
-          <MenuItem value="Premium">Premium</MenuItem>
-          <MenuItem value="Sport">Sport</MenuItem>
-          <MenuItem value="Standard">Standard</MenuItem>
+          {series.map((item) => (
+            <MenuItem key={item.id} value={String(item.id)}>
+              {item.translated || item.name}
+            </MenuItem>
+          ))}
         </Select>
       </FormControl>
 
@@ -75,13 +372,16 @@ export default function FilterComponent() {
       <FormControl fullWidth>
         <InputLabel>Комплектация</InputLabel>
         <Select
+          disabled={!values["Серия"]}
           value={values["Комплектация"] || ""}
           onChange={(e) => handleChange(e, "Комплектация")}
           sx={{ borderRadius: "16px" }}
         >
-          <MenuItem value="Luxury">Luxury</MenuItem>
-          <MenuItem value="Comfort">Comfort</MenuItem>
-          <MenuItem value="Basic">Basic</MenuItem>
+          {complectation.map((item) => (
+            <MenuItem key={item.id} value={String(item.id)}>
+              {item.translated || item.name}
+            </MenuItem>
+          ))}
         </Select>
       </FormControl>
 
@@ -93,9 +393,11 @@ export default function FilterComponent() {
           onChange={(e) => handleChange(e, "Двигатель")}
           sx={{ borderRadius: "16px" }}
         >
-          <MenuItem value="1.6L">1.6L</MenuItem>
-          <MenuItem value="2.0L">2.0L</MenuItem>
-          <MenuItem value="3.0L">3.0L</MenuItem>
+          {engine.map((item) => (
+            <MenuItem key={item.id} value={String(item.id)}>
+              {item.translated || item.name}
+            </MenuItem>
+          ))}
         </Select>
       </FormControl>
 
@@ -107,9 +409,11 @@ export default function FilterComponent() {
           onChange={(e) => handleChange(e, "Привод")}
           sx={{ borderRadius: "16px" }}
         >
-          <MenuItem value="FWD">Передний</MenuItem>
-          <MenuItem value="RWD">Задний</MenuItem>
-          <MenuItem value="AWD">Полный</MenuItem>
+          {drive.map((item) => (
+            <MenuItem key={item.id} value={String(item.id)}>
+              {item.translated || item.name}
+            </MenuItem>
+          ))}
         </Select>
       </FormControl>
 
@@ -121,12 +425,15 @@ export default function FilterComponent() {
           onChange={(e) => handleChange(e, "Цвет кузова")}
           sx={{ borderRadius: "16px" }}
         >
-          <MenuItem value="Red">Красный</MenuItem>
-          <MenuItem value="Blue">Синий</MenuItem>
-          <MenuItem value="White">Белый</MenuItem>
+          {color.map((item) => (
+            <MenuItem key={item.id} value={String(item.id)}>
+              {item.translated || item.name}
+            </MenuItem>
+          ))}
         </Select>
       </FormControl>
 
+      {/* Пробег от/до */}
       <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
         <FormControl fullWidth>
           <InputLabel>Пробег от (км)</InputLabel>
@@ -136,8 +443,8 @@ export default function FilterComponent() {
             sx={{ borderRadius: "16px" }}
           >
             <MenuItem value="0">0</MenuItem>
-            <MenuItem value="5000">5000</MenuItem>
-            <MenuItem value="10000">10000</MenuItem>
+            <MenuItem value="5000">5 000</MenuItem>
+            <MenuItem value="10000">10 000</MenuItem>
           </Select>
         </FormControl>
 
@@ -148,14 +455,14 @@ export default function FilterComponent() {
             onChange={(e) => handleChange(e, "Пробег до (км)")}
             sx={{ borderRadius: "16px" }}
           >
-            <MenuItem value="20000">20000</MenuItem>
-            <MenuItem value="50000">50000</MenuItem>
-            <MenuItem value="100000">100000</MenuItem>
+            <MenuItem value="20000">20 000</MenuItem>
+            <MenuItem value="50000">50 000</MenuItem>
+            <MenuItem value="100000">100 000</MenuItem>
           </Select>
         </FormControl>
       </Box>
 
-      {/* Цена */}
+      {/* Цена от/до */}
       <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
         <FormControl fullWidth>
           <InputLabel>Цена от ₩</InputLabel>
@@ -184,6 +491,27 @@ export default function FilterComponent() {
         </FormControl>
       </Box>
 
+      {/* Даты выпуска (от/до) */}
+      {/* Пример с обычными date- полями */}
+      <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
+        <TextField
+          label="Дата выпуска от"
+          type="date"
+          fullWidth
+          value={values["date_release_from"] || ""}
+          onChange={(e) => handleDateChange(e, "date_release_from")}
+          InputLabelProps={{ shrink: true }} // чтобы лейбл не перекрывал
+        />
+        <TextField
+          label="Дата выпуска до"
+          type="date"
+          fullWidth
+          value={values["date_release_defor"] || ""}
+          onChange={(e) => handleDateChange(e, "date_release_defor")}
+          InputLabelProps={{ shrink: true }}
+        />
+      </Box>
+
       <Button
         variant="contained"
         fullWidth
@@ -193,6 +521,7 @@ export default function FilterComponent() {
           padding: "12px 0",
           borderRadius: "16px",
         }}
+        onClick={handleSave}
       >
         Сохранить
       </Button>
