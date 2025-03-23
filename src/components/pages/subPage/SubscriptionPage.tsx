@@ -92,7 +92,6 @@ function SubscriptionPage() {
         </Typography>
       )}
 
-      {/* Список активных (или неактивных) подписок */}
       {subscriptions.map((sub) => (
         <Card
           key={sub.id}
@@ -127,7 +126,6 @@ function SubscriptionPage() {
         </Card>
       ))}
 
-      {/* Список тарифов */}
       {tariffs.map((tariff) => (
         <Card
           key={tariff.id}
