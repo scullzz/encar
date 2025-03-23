@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Box, Typography, Button, Paper, Stack } from "@mui/material";
 import {
   SwipeableList,
@@ -167,7 +167,8 @@ function HomePage() {
                           alt="Graph"
                           style={{ width: "20px", marginRight: "8px" }}
                         />
-                        Пробег: {request.mileage_from} - {request.mileage_defore}
+                        Пробег: {request.mileage_from} -{" "}
+                        {request.mileage_defore}
                       </Typography>
                       <Typography
                         variant="body2"
@@ -179,7 +180,8 @@ function HomePage() {
                           alt="Calendar"
                           style={{ width: "20px", marginRight: "8px" }}
                         />
-                        Год: {request.date_release_from.slice(0, 4)} - {request.date_release_defor.slice(0, 4)}
+                        Год: {request.date_release_from.slice(0, 4)} -{" "}
+                        {request.date_release_defor.slice(0, 4)}
                       </Typography>
                       <Typography
                         variant="body2"
