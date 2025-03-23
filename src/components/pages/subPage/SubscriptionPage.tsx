@@ -10,12 +10,26 @@ interface IDetail {
   subscription_end: string;
 }
 
+// Интерфейс для тарифов
+interface ITariff {
+  id: number;
+  name: string;
+  description: string;
+  days_count: number;
+  price: number;
+  filter_count: number;
+}
+
 function SubscriptionPage() {
   const [subscriptions, setSubscriptions] = useState<IDetail[]>([]);
   const [noSubscriptionMessage, setNoSubscriptionMessage] = useState<
     string | null
   >(null);
 
+  // Список тарифов
+  const [tariffs, setTariffs] = useState<ITariff[]>([]);
+
+  // Получаем информацию о подписке
   const getSubscription = async () => {
     try {
       const response = await fetch(
@@ -45,8 +59,26 @@ function SubscriptionPage() {
     }
   };
 
+  // Получаем список тарифов
+  const getTariffs = async () => {
+    try {
+      const response = await fetch("https://api.a-b-d.ru/tariffs/", {
+        method: "GET",
+        headers: {
+          accept: "application/json",
+          auth: "123",
+        },
+      });
+      const data = await response.json();
+      setTariffs(data);
+    } catch (err) {
+      console.error("Ошибка получения тарифов:", err);
+    }
+  };
+
   useEffect(() => {
     getSubscription();
+    getTariffs();
   }, []);
 
   return (
@@ -60,6 +92,7 @@ function SubscriptionPage() {
         </Typography>
       )}
 
+      {/* Список активных (или неактивных) подписок */}
       {subscriptions.map((sub) => (
         <Card
           key={sub.id}
@@ -93,64 +126,48 @@ function SubscriptionPage() {
           </CardContent>
         </Card>
       ))}
+
+      {/* Список тарифов */}
+      {tariffs.map((tariff) => (
+        <Card
+          key={tariff.id}
+          className={style.subscription_card}
+          sx={{ borderRadius: "24px", marginBottom: "12px" }}
+        >
+          <CardContent>
+            <Typography
+              variant="h6"
+              gutterBottom
+              sx={{ fontFamily: "Abeezee" }}
+            >
+              {tariff.name || "Без названия"}
+            </Typography>
+            <Typography
+              className={style.subscription_description}
+              sx={{ fontFamily: "Abeezee" }}
+            >
+              {tariff.description}
+            </Typography>
+
+            <Typography variant="body2" sx={{ mb: 1, fontFamily: "Abeezee" }}>
+              Цена: {tariff.price} ₩ <br />
+              Срок: {tariff.days_count} дней <br />
+              Фильтров в месяц: {tariff.filter_count}
+            </Typography>
+
+            <Button
+              variant="contained"
+              color="primary"
+              className={style.MuiButton_containedPrimary}
+              sx={{ textTransform: "none", borderRadius: 2, marginTop: "12px" }}
+            >
+              Активировать
+            </Button>
+          </CardContent>
+        </Card>
+      ))}
     </div>
   );
 }
 
 export default SubscriptionPage;
-
-{
-  /* <Card className={style.subscription_card} sx={{ borderRadius: "24px" }}>
-        <CardContent>
-          <Typography variant="h6" gutterBottom sx={{ fontFamily: "Abeezee" }}>
-            Название подписки
-          </Typography>
-          <Typography
-            className={style.subscription_description}
-            sx={{ fontFamily: "Abeezee" }}
-          >
-            • описание ограничений подписки...
-          </Typography>
-
-          <Typography variant="body2" sx={{ mb: 1, fontFamily: "Abeezee" }}>
-            Цена: 1250 руб <br />
-            Срок подписки: 1 месяц
-          </Typography>
-          <Button
-            variant="contained"
-            color="primary"
-            className={style.MuiButton_containedPrimary}
-            sx={{ textTransform: "none", borderRadius: 2, marginTop: "12px" }}
-          >
-            Активировать
-          </Button>
-        </CardContent>
-      </Card>
-
-      <Card className={style.subscription_card} sx={{ borderRadius: "24px" }}>
-        <CardContent>
-          <Typography variant="h6" gutterBottom sx={{ fontFamily: "Abeezee" }}>
-            Название подписки
-          </Typography>
-          <Typography
-            className={style.subscription_description}
-            sx={{ fontFamily: "Abeezee" }}
-          >
-            • описание ограничений подписки...
-          </Typography>
-
-          <Typography variant="body2" sx={{ mb: 1, fontFamily: "Abeezee" }}>
-            Цена: 1250 руб <br />
-            Срок подписки: 1 месяц
-          </Typography>
-          <Button
-            variant="contained"
-            color="primary"
-            className={style.MuiButton_containedPrimary}
-            sx={{ textTransform: "none", borderRadius: 2, marginTop: "12px" }}
-          >
-            Активировать
-          </Button>
-        </CardContent>
-      </Card> */
-}

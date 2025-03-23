@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   FormControl,
   InputLabel,
@@ -29,7 +29,6 @@ export default function FilterComponent() {
   const [series, setSeries] = useState<IReferenceItem[]>([]);
   const [complectation, setComplectation] = useState<IReferenceItem[]>([]);
   const [engine, setEngine] = useState<IReferenceItem[]>([]);
-  const [drive, setDrive] = useState<IReferenceItem[]>([]);
   const [color, setColor] = useState<IReferenceItem[]>([]);
 
   // =========== FETCH ФУНКЦИИ ============
@@ -128,25 +127,6 @@ export default function FilterComponent() {
     }
   };
 
-  const getDrive = async () => {
-    try {
-      const response = await fetch(
-        `https://api.a-b-d.ru/references/driveType`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            auth: "123",
-          },
-        }
-      );
-      const res = await response.json();
-      setDrive(res);
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
   const getColor = async () => {
     try {
       const response = await fetch(`https://api.a-b-d.ru/references/carColor`, {
@@ -167,11 +147,22 @@ export default function FilterComponent() {
   useEffect(() => {
     getManufacturers();
     getEngine();
-    getDrive();
     getColor();
   }, []);
 
-  // =========== ОБРАБОТЧИК SELECT'ОВ ============
+  // =========== ОБРАБОТЧИКИ ВВОДА ============
+
+  // Переписываем handleDateChange на более универсальный handleInputChange
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+    field: string
+  ) => {
+    setValues((prev) => ({
+      ...prev,
+      [field]: e.target.value,
+    }));
+  };
+
   const handleChange = async (
     event: SelectChangeEvent<string>,
     field: string
@@ -188,22 +179,34 @@ export default function FilterComponent() {
     switch (field) {
       case "Производитель":
         if (selectedId) {
-          await getModel(Number(selectedId)); // переводим строку в number
-          // Сбрасываем связанные поля
+          // Сначала сбрасываем все связанные поля
+          setModel([]);
+          setSeries([]);
+          setComplectation([]);
+
+          // Загружаем новый список моделей
+          await getModel(Number(selectedId));
+
+          // Обновляем state
           setValues((prev) => ({
             ...prev,
+            Производитель: selectedId,
             Модель: "",
             Серия: "",
             Комплектация: "",
-            [field]: selectedId,
           }));
-          setModel([]);
-          setSeries([]);
-          setComplectation([]);
         } else {
+          // Если пользователь сбросил «Производителя»
           setModel([]);
           setSeries([]);
           setComplectation([]);
+          setValues((prev) => ({
+            ...prev,
+            Производитель: "",
+            Модель: "",
+            Серия: "",
+            Комплектация: "",
+          }));
         }
         break;
 
@@ -213,19 +216,31 @@ export default function FilterComponent() {
           setValues((prev) => ({ ...prev, Модель: "" }));
           return;
         }
+
         if (selectedId) {
-          await getSeriece(Number(selectedId));
-          setValues((prev) => ({
-            ...prev,
-            Серия: "",
-            Комплектация: "",
-            [field]: selectedId,
-          }));
+          // Сначала сбрасываем всё, что зависит от модели
           setSeries([]);
           setComplectation([]);
+
+          // Загружаем список серий
+          await getSeriece(Number(selectedId));
+
+          // Обновляем state
+          setValues((prev) => ({
+            ...prev,
+            Модель: selectedId,
+            Серия: "",
+            Комплектация: "",
+          }));
         } else {
           setSeries([]);
           setComplectation([]);
+          setValues((prev) => ({
+            ...prev,
+            Модель: "",
+            Серия: "",
+            Комплектация: "",
+          }));
         }
         break;
 
@@ -235,16 +250,27 @@ export default function FilterComponent() {
           setValues((prev) => ({ ...prev, Серия: "" }));
           return;
         }
+
         if (selectedId) {
+          // Сначала сбрасываем всё, что зависит от серии
+          setComplectation([]);
+
+          // Загружаем список комплектаций
           await getComplectation(Number(selectedId));
+
+          // Обновляем state
           setValues((prev) => ({
             ...prev,
+            Серия: selectedId,
             Комплектация: "",
-            [field]: selectedId,
           }));
-          setComplectation([]);
         } else {
           setComplectation([]);
+          setValues((prev) => ({
+            ...prev,
+            Серия: "",
+            Комплектация: "",
+          }));
         }
         break;
 
@@ -253,30 +279,31 @@ export default function FilterComponent() {
     }
   };
 
-  const handleDateChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-    field: string
-  ) => {
-    setValues((prev) => ({
-      ...prev,
-      [field]: e.target.value, // строка
-    }));
-  };
-
   const handleSave = async () => {
     const payload = {
       user_id: 123,
-      manufacture_id: Number(values["Производитель"] || 0),
-      model_id: Number(values["Модель"] || 0),
-      series_id: Number(values["Серия"] || 0),
-      equipment_id: Number(values["Комплектация"] || 0),
-      engine_type_id: Number(values["Двигатель"] || 0),
-      drive_type_id: Number(values["Привод"] || 0),
-      car_color_id: Number(values["Цвет кузова"] || 0),
-      mileage_from: Number(values["Пробег от (км)"] || 0),
-      mileage_defore: Number(values["Пробег до (км)"] || 0),
-      price_from: Number(values["Цена от ₩"] || 0),
-      price_defore: Number(values["Цена до ₩"] || 0),
+      manufacture_id: values["Производитель"]
+        ? Number(values["Производитель"])
+        : null,
+      model_id: values["Модель"] ? Number(values["Модель"]) : null,
+      series_id: values["Серия"] ? Number(values["Серия"]) : null,
+      equipment_id: values["Комплектация"]
+        ? Number(values["Комплектация"])
+        : null,
+      engine_type_id: values["Двигатель"] ? Number(values["Двигатель"]) : null,
+      drive_type_id: values["Привод"] ? Number(values["Привод"]) : null,
+      car_color_id: values["Цвет кузова"]
+        ? Number(values["Цвет кузова"])
+        : null,
+
+      mileage_from: values["Пробег от (км)"]
+        ? Number(values["Пробег от (км)"])
+        : null,
+      mileage_defore: values["Пробег до (км)"]
+        ? Number(values["Пробег до (км)"])
+        : null,
+      price_from: values["Цена от ₩"] ? Number(values["Цена от ₩"]) : null,
+      price_defore: values["Цена до ₩"] ? Number(values["Цена до ₩"]) : null,
 
       date_release_from: values["date_release_from"]
         ? new Date(values["date_release_from"]).toISOString()
@@ -401,22 +428,6 @@ export default function FilterComponent() {
         </Select>
       </FormControl>
 
-      {/* Привод */}
-      <FormControl fullWidth>
-        <InputLabel>Привод</InputLabel>
-        <Select
-          value={values["Привод"] || ""}
-          onChange={(e) => handleChange(e, "Привод")}
-          sx={{ borderRadius: "16px" }}
-        >
-          {drive.map((item) => (
-            <MenuItem key={item.id} value={String(item.id)}>
-              {item.translated || item.name}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-
       {/* Цвет кузова */}
       <FormControl fullWidth>
         <InputLabel>Цвет кузова</InputLabel>
@@ -433,81 +444,66 @@ export default function FilterComponent() {
         </Select>
       </FormControl>
 
-      {/* Пробег от/до */}
+      {/* Пробег от/до - Заменяем Select на обычные input'ы */}
       <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
-        <FormControl fullWidth>
-          <InputLabel>Пробег от (км)</InputLabel>
-          <Select
-            value={values["Пробег от (км)"] || ""}
-            onChange={(e) => handleChange(e, "Пробег от (км)")}
-            sx={{ borderRadius: "16px" }}
-          >
-            <MenuItem value="0">0</MenuItem>
-            <MenuItem value="5000">5 000</MenuItem>
-            <MenuItem value="10000">10 000</MenuItem>
-          </Select>
-        </FormControl>
-
-        <FormControl fullWidth>
-          <InputLabel>Пробег до (км)</InputLabel>
-          <Select
-            value={values["Пробег до (км)"] || ""}
-            onChange={(e) => handleChange(e, "Пробег до (км)")}
-            sx={{ borderRadius: "16px" }}
-          >
-            <MenuItem value="20000">20 000</MenuItem>
-            <MenuItem value="50000">50 000</MenuItem>
-            <MenuItem value="100000">100 000</MenuItem>
-          </Select>
-        </FormControl>
+        <TextField
+          label="Пробег от (км)"
+          type="number"
+          fullWidth
+          value={values["Пробег от (км)"] || ""}
+          onChange={(e) => handleInputChange(e, "Пробег от (км)")}
+          sx={{ borderRadius: "16px" }}
+          InputLabelProps={{ shrink: true }}
+        />
+        <TextField
+          label="Пробег до (км)"
+          type="number"
+          fullWidth
+          value={values["Пробег до (км)"] || ""}
+          onChange={(e) => handleInputChange(e, "Пробег до (км)")}
+          sx={{ borderRadius: "16px" }}
+          InputLabelProps={{ shrink: true }}
+        />
       </Box>
 
-      {/* Цена от/до */}
+      {/* Цена от/до - Заменяем Select на обычные input'ы */}
       <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
-        <FormControl fullWidth>
-          <InputLabel>Цена от ₩</InputLabel>
-          <Select
-            value={values["Цена от ₩"] || ""}
-            onChange={(e) => handleChange(e, "Цена от ₩")}
-            sx={{ borderRadius: "16px" }}
-          >
-            <MenuItem value="1000000">1 000 000</MenuItem>
-            <MenuItem value="2000000">2 000 000</MenuItem>
-            <MenuItem value="3000000">3 000 000</MenuItem>
-          </Select>
-        </FormControl>
-
-        <FormControl fullWidth>
-          <InputLabel>Цена до ₩</InputLabel>
-          <Select
-            value={values["Цена до ₩"] || ""}
-            onChange={(e) => handleChange(e, "Цена до ₩")}
-            sx={{ borderRadius: "16px" }}
-          >
-            <MenuItem value="5000000">5 000 000</MenuItem>
-            <MenuItem value="10000000">10 000 000</MenuItem>
-            <MenuItem value="20000000">20 000 000</MenuItem>
-          </Select>
-        </FormControl>
+        <TextField
+          label="Цена от ₩"
+          type="number"
+          fullWidth
+          value={values["Цена от ₩"] || ""}
+          onChange={(e) => handleInputChange(e, "Цена от ₩")}
+          sx={{ borderRadius: "16px" }}
+          InputLabelProps={{ shrink: true }}
+        />
+        <TextField
+          label="Цена до ₩"
+          type="number"
+          fullWidth
+          value={values["Цена до ₩"] || ""}
+          onChange={(e) => handleInputChange(e, "Цена до ₩")}
+          sx={{ borderRadius: "16px" }}
+          InputLabelProps={{ shrink: true }}
+        />
       </Box>
 
       {/* Даты выпуска (от/до) */}
-      {/* Пример с обычными date- полями */}
       <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
         <TextField
           label="Дата выпуска от"
           type="date"
           fullWidth
           value={values["date_release_from"] || ""}
-          onChange={(e) => handleDateChange(e, "date_release_from")}
-          InputLabelProps={{ shrink: true }} // чтобы лейбл не перекрывал
+          onChange={(e) => handleInputChange(e, "date_release_from")}
+          InputLabelProps={{ shrink: true }}
         />
         <TextField
           label="Дата выпуска до"
           type="date"
           fullWidth
           value={values["date_release_defor"] || ""}
-          onChange={(e) => handleDateChange(e, "date_release_defor")}
+          onChange={(e) => handleInputChange(e, "date_release_defor")}
           InputLabelProps={{ shrink: true }}
         />
       </Box>
