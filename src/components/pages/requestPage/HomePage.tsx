@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Box, Typography, Button, Paper, Stack } from "@mui/material";
 import {
   SwipeableList,
@@ -15,20 +15,62 @@ import CashIcon from "./image/cash.png";
 import GraphIcon from "./image/graph.png";
 import { useNavigate } from "react-router-dom";
 
+interface IRequest {
+  id: number;
+  manufacture_name: string;
+  model_name: string;
+  series_name: string;
+  equipment_name: string;
+  mileage_from: number;
+  mileage_defore: number;
+  price_from: number;
+  price_defore: number;
+  date_release_from: string;
+  date_release_defor: string;
+}
+
 function HomePage() {
   const navigate = useNavigate();
-  const [requests, setRequests] = React.useState([
-    { id: 100, model: "Audi A3", mileage: "-", year: "-", price: "-" },
-    { id: 101, model: "Audi A3", mileage: "-", year: "-", price: "-" },
-  ]);
+  const [requests, setRequests] = useState<IRequest[]>([]);
 
-  const handleDelete = (id: number) => {
-    setRequests(requests.filter((request) => request.id !== id));
+  const getRequest = async () => {
+    try {
+      const response = await fetch("https://api.a-b-d.ru/filter/{user_id}", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          auth: `123`,
+        },
+      });
+      const res = await response.json();
+      setRequests(res);
+    } catch (err) {
+      console.log(err);
+    }
   };
+
+  const deleteRequest = async (id: number) => {
+    try {
+      await fetch(`https://api.a-b-d.ru/filter/${id}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          auth: `123`,
+        },
+      });
+      setRequests(requests.filter((request) => request.id !== id));
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  useEffect(() => {
+    getRequest();
+  }, []);
 
   const trailingActions = (id: number) => (
     <TrailingActions>
-      <SwipeAction destructive={true} onClick={() => handleDelete(id)}>
+      <SwipeAction destructive={true} onClick={() => deleteRequest(id)}>
         <Box
           sx={{
             backgroundColor: "#ff3a30",
@@ -52,103 +94,112 @@ function HomePage() {
   return (
     <Box sx={{ display: "flex", flexDirection: "column", height: "100vh" }}>
       <Box sx={{ flex: 1, overflowY: "auto", padding: "16px" }}>
-        <SwipeableList type={ListType.IOS}>
-          {requests.map((request, index) => (
-            <Box
-              key={index}
-              sx={{
-                position: "relative",
-                overflow: "hidden",
-                borderRadius: "16px",
-                marginBottom: "12px",
-                height: "130px",
-              }}
-            >
+        {requests.length === 0 ? (
+          <Typography
+            variant="h6"
+            sx={{ textAlign: "center", color: "gray", marginTop: "20px" }}
+          >
+            У вас пока нет запросов.
+          </Typography>
+        ) : (
+          <SwipeableList type={ListType.IOS}>
+            {requests.map((request, index) => (
               <Box
+                key={index}
                 sx={{
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  backgroundColor: "#ff3a30",
+                  position: "relative",
+                  overflow: "hidden",
                   borderRadius: "16px",
-                  zIndex: 0,
+                  marginBottom: "12px",
+                  height: "130px",
                 }}
-              />
-
-              <SwipeableListItem
-                trailingActions={trailingActions(request.id)}
-                fullSwipe={false}
-                maxSwipe={0.35}
-                listType={ListType.IOS}
               >
-                <Paper
-                  elevation={3}
+                <Box
                   sx={{
-                    padding: "12px 16px",
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    backgroundColor: "#ff3a30",
                     borderRadius: "16px",
-                    width: "100%",
-                    boxSizing: "border-box",
-                    position: "relative",
-                    zIndex: 1,
+                    zIndex: 0,
                   }}
+                />
+
+                <SwipeableListItem
+                  trailingActions={trailingActions(request.id)}
+                  fullSwipe={false}
+                  maxSwipe={0.35}
+                  listType={ListType.IOS}
                 >
-                  <Stack spacing={1} sx={{ fontFamily: "ABeeZee" }}>
-                    <Typography
-                      variant="body1"
-                      fontWeight="bold"
-                      sx={{ display: "flex", alignItems: "center" }}
-                    >
-                      <img
-                        src={CarIcon}
-                        alt="Car"
-                        style={{ width: "20px", marginRight: "8px" }}
-                      />
-                      № {request.id}, {request.model}
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      color="text.secondary"
-                      sx={{ display: "flex", alignItems: "center" }}
-                    >
-                      <img
-                        src={GraphIcon}
-                        alt="Graph"
-                        style={{ width: "20px", marginRight: "8px" }}
-                      />
-                      Пробег: {request.mileage}
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      color="text.secondary"
-                      sx={{ display: "flex", alignItems: "center" }}
-                    >
-                      <img
-                        src={CalendarIcon}
-                        alt="Calendar"
-                        style={{ width: "20px", marginRight: "8px" }}
-                      />
-                      Год: {request.year}
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      color="text.secondary"
-                      sx={{ display: "flex", alignItems: "center" }}
-                    >
-                      <img
-                        src={CashIcon}
-                        alt="Cash"
-                        style={{ width: "20px", marginRight: "8px" }}
-                      />
-                      Цена: {request.price}
-                    </Typography>
-                  </Stack>
-                </Paper>
-              </SwipeableListItem>
-            </Box>
-          ))}
-        </SwipeableList>
+                  <Paper
+                    elevation={3}
+                    sx={{
+                      padding: "12px 16px",
+                      borderRadius: "16px",
+                      width: "100%",
+                      boxSizing: "border-box",
+                      position: "relative",
+                      zIndex: 1,
+                    }}
+                  >
+                    <Stack spacing={1} sx={{ fontFamily: "ABeeZee" }}>
+                      <Typography
+                        variant="body1"
+                        fontWeight="bold"
+                        sx={{ display: "flex", alignItems: "center" }}
+                      >
+                        <img
+                          src={CarIcon}
+                          alt="Car"
+                          style={{ width: "20px", marginRight: "8px" }}
+                        />
+                        № {request.id}, {request.model_name}
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        sx={{ display: "flex", alignItems: "center" }}
+                      >
+                        <img
+                          src={GraphIcon}
+                          alt="Graph"
+                          style={{ width: "20px", marginRight: "8px" }}
+                        />
+                        Пробег: {request.mileage_from} - {request.mileage_defore}
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        sx={{ display: "flex", alignItems: "center" }}
+                      >
+                        <img
+                          src={CalendarIcon}
+                          alt="Calendar"
+                          style={{ width: "20px", marginRight: "8px" }}
+                        />
+                        Год: {request.date_release_from.slice(0, 4)} - {request.date_release_defor.slice(0, 4)}
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        sx={{ display: "flex", alignItems: "center" }}
+                      >
+                        <img
+                          src={CashIcon}
+                          alt="Cash"
+                          style={{ width: "20px", marginRight: "8px" }}
+                        />
+                        Цена: {request.price_from} - {request.price_defore}
+                      </Typography>
+                    </Stack>
+                  </Paper>
+                </SwipeableListItem>
+              </Box>
+            ))}
+          </SwipeableList>
+        )}
       </Box>
 
       <Box
