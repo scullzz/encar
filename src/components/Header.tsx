@@ -4,7 +4,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 
 function Header() {
-  const tg = Telegram?.WebApp;
+  const tg = window.Telegram?.WebApp;
 
   const handleClose = () => {
     tg?.close();

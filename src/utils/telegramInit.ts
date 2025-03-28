@@ -2,9 +2,10 @@ import { useEffect } from "react";
 
 function useTelegramWebAppInit() {
   useEffect(() => {
-    const tg = Telegram?.WebApp;
+    const tg = window.Telegram?.WebApp;
     if (!tg) return;
     tg.expand();
+    // tg.requestFullscreen();
 
     tg.MainButton?.setParams({
       text: "Сохранить",
