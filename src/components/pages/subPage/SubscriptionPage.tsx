@@ -10,7 +10,6 @@ interface IDetail {
   subscription_end: string;
 }
 
-// Интерфейс для тарифов
 interface ITariff {
   id: number;
   name: string;
@@ -25,11 +24,8 @@ function SubscriptionPage() {
   const [noSubscriptionMessage, setNoSubscriptionMessage] = useState<
     string | null
   >(null);
-
-  // Список тарифов
   const [tariffs, setTariffs] = useState<ITariff[]>([]);
 
-  // Получаем информацию о подписке
   const getSubscription = async () => {
     try {
       const response = await fetch(
@@ -50,16 +46,15 @@ function SubscriptionPage() {
         );
         setSubscriptions([]);
       } else if (Array.isArray(res)) {
-        setSubscriptions(res); // Если API возвращает массив
+        setSubscriptions(res);
       } else if (res && typeof res === "object") {
-        setSubscriptions([res]); // Если API возвращает объект, помещаем его в массив
+        setSubscriptions([res]);
       }
     } catch (err) {
       console.error("Ошибка загрузки данных:", err);
     }
   };
 
-  // Получаем список тарифов
   const getTariffs = async () => {
     try {
       const response = await fetch("https://api.a-b-d.ru/tariffs/", {
@@ -82,7 +77,10 @@ function SubscriptionPage() {
   }, []);
 
   return (
-    <div className={style.subscription_container}>
+    <div
+      className={style.subscription_container}
+      style={{ overflow: "hidden" }}
+    >
       {noSubscriptionMessage && (
         <Typography
           variant="h6"
@@ -106,14 +104,12 @@ function SubscriptionPage() {
             >
               {sub.name || "Название не указано"}
             </Typography>
-
             <Typography
               className={style.subscription_description}
               sx={{ fontFamily: "Abeezee" }}
             >
               {sub.description || "Описание не указано"}
             </Typography>
-
             <Button
               variant="contained"
               color="success"
@@ -146,13 +142,11 @@ function SubscriptionPage() {
             >
               {tariff.description}
             </Typography>
-
             <Typography variant="body2" sx={{ mb: 1, fontFamily: "Abeezee" }}>
               Цена: {tariff.price} ₩ <br />
               Срок: {tariff.days_count} дней <br />
               Фильтров в месяц: {tariff.filter_count}
             </Typography>
-
             <Button
               variant="contained"
               color="primary"

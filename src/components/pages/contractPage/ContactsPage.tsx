@@ -45,6 +45,7 @@ function ContactsPage() {
         fontFamily: "ABeeZee",
         backgroundColor: "#f9f9f9",
         minHeight: "100vh",
+        paddingBottom: "66px",
       }}
     >
       {contracts.length === 0 ? (

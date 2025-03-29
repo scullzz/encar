@@ -151,8 +151,6 @@ export default function FilterComponent() {
   }, []);
 
   // =========== ОБРАБОТЧИКИ ВВОДА ============
-
-  // Переписываем handleDateChange на более универсальный handleInputChange
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
     field: string
@@ -252,10 +250,7 @@ export default function FilterComponent() {
         }
 
         if (selectedId) {
-          // Сначала сбрасываем всё, что зависит от серии
           setComplectation([]);
-
-          // Загружаем список комплектаций
           await getComplectation(Number(selectedId));
 
           // Обновляем state
@@ -343,15 +338,19 @@ export default function FilterComponent() {
         gap: 2,
         borderRadius: "24px",
         backgroundColor: "#f5f5f5",
+        paddingBottom: "66px",
       }}
     >
       {/* Производитель */}
       <FormControl fullWidth>
-        <InputLabel>Производитель</InputLabel>
+        <InputLabel id="manufacture-label">Производитель</InputLabel>
         <Select
+          labelId="manufacture-label"
+          id="manufacture-select"
           value={values["Производитель"] || ""}
           onChange={(e) => handleChange(e, "Производитель")}
           sx={{ borderRadius: "16px" }}
+          label="Производитель"
         >
           {manufactury.map((item) => (
             <MenuItem key={item.id} value={String(item.id)}>
@@ -363,11 +362,14 @@ export default function FilterComponent() {
 
       {/* Модель */}
       <FormControl fullWidth>
-        <InputLabel>Модель</InputLabel>
+        <InputLabel id="model-label">Модель</InputLabel>
         <Select
+          labelId="model-label"
+          id="model-select"
           disabled={!values["Производитель"]}
           value={values["Модель"] || ""}
           onChange={(e) => handleChange(e, "Модель")}
+          label="Модель"
           sx={{ borderRadius: "16px" }}
         >
           {model.map((item) => (
@@ -380,11 +382,14 @@ export default function FilterComponent() {
 
       {/* Серия */}
       <FormControl fullWidth>
-        <InputLabel>Серия</InputLabel>
+        <InputLabel id="series-label">Серия</InputLabel>
         <Select
+          labelId="series-label"
+          id="series-select"
           disabled={!values["Модель"]}
           value={values["Серия"] || ""}
           onChange={(e) => handleChange(e, "Серия")}
+          label="Серия"
           sx={{ borderRadius: "16px" }}
         >
           {series.map((item) => (
@@ -397,11 +402,14 @@ export default function FilterComponent() {
 
       {/* Комплектация */}
       <FormControl fullWidth>
-        <InputLabel>Комплектация</InputLabel>
+        <InputLabel id="complectation-label">Комплектация</InputLabel>
         <Select
+          labelId="complectation-label"
+          id="complectation-select"
           disabled={!values["Серия"]}
           value={values["Комплектация"] || ""}
           onChange={(e) => handleChange(e, "Комплектация")}
+          label="Комплектация"
           sx={{ borderRadius: "16px" }}
         >
           {complectation.map((item) => (
@@ -414,10 +422,13 @@ export default function FilterComponent() {
 
       {/* Двигатель */}
       <FormControl fullWidth>
-        <InputLabel>Двигатель</InputLabel>
+        <InputLabel id="engine-label">Двигатель</InputLabel>
         <Select
+          labelId="engine-label"
+          id="engine-select"
           value={values["Двигатель"] || ""}
           onChange={(e) => handleChange(e, "Двигатель")}
+          label="Двигатель"
           sx={{ borderRadius: "16px" }}
         >
           {engine.map((item) => (
@@ -430,10 +441,13 @@ export default function FilterComponent() {
 
       {/* Цвет кузова */}
       <FormControl fullWidth>
-        <InputLabel>Цвет кузова</InputLabel>
+        <InputLabel id="color-label">Цвет кузова</InputLabel>
         <Select
+          labelId="color-label"
+          id="color-select"
           value={values["Цвет кузова"] || ""}
           onChange={(e) => handleChange(e, "Цвет кузова")}
+          label="Цвет кузова"
           sx={{ borderRadius: "16px" }}
         >
           {color.map((item) => (
@@ -444,9 +458,10 @@ export default function FilterComponent() {
         </Select>
       </FormControl>
 
-      {/* Пробег от/до - Заменяем Select на обычные input'ы */}
+      {/* Пробег от/до */}
       <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
         <TextField
+          id="mileage-from"
           label="Пробег от (км)"
           type="number"
           fullWidth
@@ -456,6 +471,7 @@ export default function FilterComponent() {
           InputLabelProps={{ shrink: true }}
         />
         <TextField
+          id="mileage-to"
           label="Пробег до (км)"
           type="number"
           fullWidth
@@ -466,9 +482,10 @@ export default function FilterComponent() {
         />
       </Box>
 
-      {/* Цена от/до - Заменяем Select на обычные input'ы */}
+      {/* Цена от/до */}
       <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
         <TextField
+          id="price-from"
           label="Цена от ₩"
           type="number"
           fullWidth
@@ -478,6 +495,7 @@ export default function FilterComponent() {
           InputLabelProps={{ shrink: true }}
         />
         <TextField
+          id="price-to"
           label="Цена до ₩"
           type="number"
           fullWidth
@@ -488,9 +506,10 @@ export default function FilterComponent() {
         />
       </Box>
 
-      {/* Даты выпуска (от/до) */}
+      {/* Даты выпуска */}
       <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
         <TextField
+          id="date-release-from"
           label="Дата выпуска от"
           type="date"
           fullWidth
@@ -499,6 +518,7 @@ export default function FilterComponent() {
           InputLabelProps={{ shrink: true }}
         />
         <TextField
+          id="date-release-to"
           label="Дата выпуска до"
           type="date"
           fullWidth

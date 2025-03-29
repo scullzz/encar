@@ -92,8 +92,21 @@ function HomePage() {
   );
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", height: "100vh" }}>
-      <Box sx={{ flex: 1, overflowY: "auto", padding: "16px" }}>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        height: "100vh",
+      }}
+    >
+      <Box
+        sx={{
+          flex: 1,
+          overflowY: "auto",
+          padding: "16px",
+          paddingBottom: "132px",
+        }}
+      >
         {requests.length === 0 ? (
           <Typography
             variant="h6"
@@ -207,7 +220,7 @@ function HomePage() {
       <Box
         sx={{
           position: "sticky",
-          bottom: 0,
+          bottom: 56,
           left: 0,
           right: 0,
           backgroundColor: "#fff",

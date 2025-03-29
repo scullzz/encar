@@ -32,8 +32,8 @@ function App() {
   }, []);
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
-      <div style={{ flex: 1, overflow: "auto", paddingBottom: "56px" }}>
+    <div style={{ position: "relative", height: "100vh" }}>
+      <div style={{ height: "100%", overflow: "auto" }}>
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/add" element={<AddNewRequest />}></Route>
