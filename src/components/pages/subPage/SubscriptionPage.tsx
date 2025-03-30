@@ -2,25 +2,30 @@ import { Card, CardContent, Typography, Button } from "@mui/material";
 import style from "./subscription.module.css";
 import { useEffect, useState } from "react";
 
-interface IDetail {
-  id: number;
-  name: string;
-  description: string;
-  filter_count: number;
-  subscription_end: string;
-}
-
 interface ITariff {
   id: number;
   name: string;
   description: string;
   days_count: number;
   price: number;
-  filter_count: number;
+  filters_count: number;
+  create_dttm: string;
+  update_dttm: string;
+}
+
+// Интерфейс для подписки
+interface ISubscription {
+  id: number;
+  user_id: number;
+  tariff: ITariff;
+  subscription_end: string;
+  create_dttm: string;
+  update_dttm: string;
 }
 
 function SubscriptionPage() {
-  const [subscriptions, setSubscriptions] = useState<IDetail[]>([]);
+  const tg = window.Telegram?.WebApp;
+  const [subscription, setSubscription] = useState<ISubscription | null>(null);
   const [noSubscriptionMessage, setNoSubscriptionMessage] = useState<
     string | null
   >(null);
@@ -28,30 +33,32 @@ function SubscriptionPage() {
 
   const getSubscription = async () => {
     try {
-      const response = await fetch(
-        "https://api.a-b-d.ru/subscription/{user_id}",
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            auth: `123`,
-          },
+      const response = await fetch("https://api.a-b-d.ru/subscription/active", {
+        method: "GET",
+        headers: {
+          accept: "application/json",
+          auth: "123",
+        },
+      });
+      if (!response.ok) {
+        if (response.status === 404) {
+          const res = await response.json();
+          if (res.detail === "Подписка не найдена") {
+            setNoSubscriptionMessage(
+              "Подписка не найдена. Пожалуйста, оформите подписку."
+            );
+            setSubscription(null);
+          }
+        } else {
+          console.error("Ошибка запроса подписки:", response.status);
         }
-      );
-      const res = await response.json();
-
-      if (res.detail === "Подписка не найдена") {
-        setNoSubscriptionMessage(
-          "Подписка не найдена. Пожалуйста, оформите подписку."
-        );
-        setSubscriptions([]);
-      } else if (Array.isArray(res)) {
-        setSubscriptions(res);
-      } else if (res && typeof res === "object") {
-        setSubscriptions([res]);
+      } else {
+        const data: ISubscription = await response.json();
+        setSubscription(data);
+        setNoSubscriptionMessage(null);
       }
     } catch (err) {
-      console.error("Ошибка загрузки данных:", err);
+      console.error("Ошибка загрузки данных подписки:", err);
     }
   };
 
@@ -64,10 +71,36 @@ function SubscriptionPage() {
           auth: "123",
         },
       });
-      const data = await response.json();
+      const data: ITariff[] = await response.json();
       setTariffs(data);
     } catch (err) {
       console.error("Ошибка получения тарифов:", err);
+    }
+  };
+
+  const ActivateSubscription = async (id: number) => {
+    try {
+      const response = await fetch("https://api.a-b-d.ru/payhistory/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          accept: "application/json",
+          auth: "123",
+        },
+        body: JSON.stringify({
+          tariff_id: id,
+          email: tg.initData || "testEmail",
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const redirectUrl = data.payment_url;
+
+        window.location.href = redirectUrl;
+      }
+    } catch (err) {
+      console.log(err);
     }
   };
 
@@ -90,9 +123,9 @@ function SubscriptionPage() {
         </Typography>
       )}
 
-      {subscriptions.map((sub) => (
+      {subscription ? (
         <Card
-          key={sub.id}
+          key={subscription.id}
           className={style.subscription_card}
           sx={{ borderRadius: "24px", marginBottom: "12px" }}
         >
@@ -102,13 +135,13 @@ function SubscriptionPage() {
               gutterBottom
               sx={{ fontFamily: "Abeezee" }}
             >
-              {sub.name || "Название не указано"}
+              {subscription.tariff.name || "Название не указано"}
             </Typography>
             <Typography
               className={style.subscription_description}
               sx={{ fontFamily: "Abeezee" }}
             >
-              {sub.description || "Описание не указано"}
+              {subscription.tariff.description || "Описание не указано"}
             </Typography>
             <Button
               variant="contained"
@@ -116,48 +149,53 @@ function SubscriptionPage() {
               className={style.MuiButton_containedSuccess}
               sx={{ textTransform: "none", borderRadius: 2, marginTop: "12px" }}
             >
-              Активна до {sub.subscription_end || "дата не указана"}
+              Активна до {subscription.subscription_end || "дата не указана"}
             </Button>
           </CardContent>
         </Card>
-      ))}
-
-      {tariffs.map((tariff) => (
-        <Card
-          key={tariff.id}
-          className={style.subscription_card}
-          sx={{ borderRadius: "24px", marginBottom: "12px" }}
-        >
-          <CardContent>
-            <Typography
-              variant="h6"
-              gutterBottom
-              sx={{ fontFamily: "Abeezee" }}
-            >
-              {tariff.name || "Без названия"}
-            </Typography>
-            <Typography
-              className={style.subscription_description}
-              sx={{ fontFamily: "Abeezee" }}
-            >
-              {tariff.description}
-            </Typography>
-            <Typography variant="body2" sx={{ mb: 1, fontFamily: "Abeezee" }}>
-              Цена: {tariff.price} ₩ <br />
-              Срок: {tariff.days_count} дней <br />
-              Фильтров в месяц: {tariff.filter_count}
-            </Typography>
-            <Button
-              variant="contained"
-              color="primary"
-              className={style.MuiButton_containedPrimary}
-              sx={{ textTransform: "none", borderRadius: 2, marginTop: "12px" }}
-            >
-              Активировать
-            </Button>
-          </CardContent>
-        </Card>
-      ))}
+      ) : (
+        tariffs.map((tariff) => (
+          <Card
+            key={tariff.id}
+            className={style.subscription_card}
+            sx={{ borderRadius: "24px", marginBottom: "12px" }}
+          >
+            <CardContent>
+              <Typography
+                variant="h6"
+                gutterBottom
+                sx={{ fontFamily: "Abeezee" }}
+              >
+                {tariff.name || "Без названия"}
+              </Typography>
+              <Typography
+                className={style.subscription_description}
+                sx={{ fontFamily: "Abeezee" }}
+              >
+                {tariff.description}
+              </Typography>
+              <Typography variant="body2" sx={{ mb: 1, fontFamily: "Abeezee" }}>
+                Цена: {tariff.price} ₩ <br />
+                Срок: {tariff.days_count} дней <br />
+                Фильтров в месяц: {tariff.filters_count}
+              </Typography>
+              <Button
+                onClick={() => ActivateSubscription(tariff.id)}
+                variant="contained"
+                color="primary"
+                className={style.MuiButton_containedPrimary}
+                sx={{
+                  textTransform: "none",
+                  borderRadius: 2,
+                  marginTop: "12px",
+                }}
+              >
+                Активировать
+              </Button>
+            </CardContent>
+          </Card>
+        ))
+      )}
     </div>
   );
 }
