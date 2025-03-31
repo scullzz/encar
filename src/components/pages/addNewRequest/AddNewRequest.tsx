@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Snackbar, Alert } from "@mui/material";
 import {
   FormControl,
   InputLabel,
@@ -30,6 +31,12 @@ export default function FilterComponent() {
   const [complectation, setComplectation] = useState<IReferenceItem[]>([]);
   const [engine, setEngine] = useState<IReferenceItem[]>([]);
   const [color, setColor] = useState<IReferenceItem[]>([]);
+
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">(
+    "success"
+  );
 
   // =========== FETCH ФУНКЦИИ ============
   const getManufacturers = async () => {
@@ -286,7 +293,6 @@ export default function FilterComponent() {
         ? Number(values["Комплектация"])
         : null,
       engine_type_id: values["Двигатель"] ? Number(values["Двигатель"]) : null,
-      drive_type_id: values["Привод"] ? Number(values["Привод"]) : null,
       car_color_id: values["Цвет кузова"]
         ? Number(values["Цвет кузова"])
         : null,
@@ -324,8 +330,15 @@ export default function FilterComponent() {
 
       const result = await response.json();
       console.log("Успешно сохранён фильтр:", result);
+
+      setSnackbarMessage("Фильтр успешно сохранён!");
+      setSnackbarSeverity("success");
+      setSnackbarOpen(true);
     } catch (err) {
       console.error("Ошибка при сохранении фильтра", err);
+      setSnackbarMessage("Произошла ошибка при сохранении фильтра");
+      setSnackbarSeverity("error");
+      setSnackbarOpen(true);
     }
   };
 
@@ -341,6 +354,22 @@ export default function FilterComponent() {
         paddingBottom: "66px",
       }}
     >
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={2000}
+        onClose={() => setSnackbarOpen(false)}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert
+          onClose={() => setSnackbarOpen(false)}
+          severity={snackbarSeverity}
+          variant="filled"
+          sx={{ width: "100%" }}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
+
       {/* Производитель */}
       <FormControl fullWidth>
         <InputLabel id="manufacture-label">Производитель</InputLabel>
