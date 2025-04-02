@@ -88,7 +88,7 @@ function SubscriptionPage() {
         },
         body: JSON.stringify({
           tariff_id: id,
-          email: tg.initData || "testEmail",
+          email: "testEmail",
         }),
       });
 
