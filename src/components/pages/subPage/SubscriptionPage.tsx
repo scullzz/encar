@@ -91,8 +91,9 @@ function SubscriptionPage() {
           email: "testEmail",
         }),
       });
-
+      alert("First");
       if (response.ok) {
+        alert("Seconds");
         const data = await response.json();
         const redirectUrl = data.payment_url;
 
