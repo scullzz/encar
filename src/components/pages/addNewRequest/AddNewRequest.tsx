@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Snackbar, Alert } from "@mui/material";
+import { tg } from "../../../main";
 import {
   FormControl,
   InputLabel,
@@ -47,7 +48,7 @@ export default function FilterComponent() {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            auth: "123",
+            auth: tg?.initData,
           },
         }
       );
@@ -66,7 +67,7 @@ export default function FilterComponent() {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            auth: "123",
+            auth: tg?.initData,
           },
         }
       );
@@ -85,7 +86,7 @@ export default function FilterComponent() {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            auth: "123",
+            auth: tg?.initData,
           },
         }
       );
@@ -104,7 +105,7 @@ export default function FilterComponent() {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            auth: "123",
+            auth: tg?.initData,
           },
         }
       );
@@ -123,7 +124,7 @@ export default function FilterComponent() {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            auth: "123",
+            auth: tg?.initData,
           },
         }
       );
@@ -140,7 +141,7 @@ export default function FilterComponent() {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          auth: "123",
+          auth: tg?.initData,
         },
       });
       const res = await response.json();
@@ -283,7 +284,6 @@ export default function FilterComponent() {
 
   const handleSave = async () => {
     const payload = {
-      user_id: 123,
       manufacture_id: values["Производитель"]
         ? Number(values["Производитель"])
         : null,
@@ -319,7 +319,7 @@ export default function FilterComponent() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          auth: "123",
+          auth: tg?.initData,
         },
         body: JSON.stringify(payload),
       });

@@ -7,6 +7,7 @@ import Navigation from "./Navigation";
 import AddNewRequest from "./pages/addNewRequest/AddNewRequest";
 import { useEffect } from "react";
 import SuccessPayment from "./SuccessPayment";
+import { tg } from "../main";
 
 function App() {
   useTelegramWebAppInit();
@@ -16,7 +17,7 @@ function App() {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          auth: `123`,
+          auth: tg?.initData,
         },
       });
 

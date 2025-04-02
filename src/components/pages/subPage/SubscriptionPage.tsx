@@ -13,7 +13,6 @@ interface ITariff {
   update_dttm: string;
 }
 
-// Интерфейс для подписки
 interface ISubscription {
   id: number;
   user_id: number;
@@ -37,7 +36,7 @@ function SubscriptionPage() {
         method: "GET",
         headers: {
           accept: "application/json",
-          auth: "123",
+          auth: tg?.initData,
         },
       });
       if (!response.ok) {
@@ -68,7 +67,7 @@ function SubscriptionPage() {
         method: "GET",
         headers: {
           accept: "application/json",
-          auth: "123",
+          auth: tg?.initData,
         },
       });
       const data: ITariff[] = await response.json();
@@ -85,7 +84,7 @@ function SubscriptionPage() {
         headers: {
           "Content-Type": "application/json",
           accept: "application/json",
-          auth: "123",
+          auth: tg?.initData,
         },
         body: JSON.stringify({
           tariff_id: id,

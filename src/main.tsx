@@ -5,7 +5,7 @@ import { BrowserRouter } from "react-router-dom";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import App from "./components/App";
 import "./index.css";
-
+export const tg = window.Telegram?.WebApp;
 const theme = createTheme({
   palette: { primary: { main: "#1976d2" } },
 });

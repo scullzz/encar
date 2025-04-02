@@ -7,7 +7,7 @@ import {
 } from "@mui/material";
 import { ChevronRight } from "@mui/icons-material";
 import { useEffect, useState } from "react";
-
+import { tg } from "../../../main";
 interface Item {
   title: string;
   url: string;
@@ -23,7 +23,7 @@ function ContactsPage() {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          auth: `123`,
+          auth: tg?.initData,
         },
       });
       const res = await response.json();

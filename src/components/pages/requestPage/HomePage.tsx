@@ -14,6 +14,7 @@ import CarIcon from "./image/car.png";
 import CashIcon from "./image/cash.png";
 import GraphIcon from "./image/graph.png";
 import { useNavigate } from "react-router-dom";
+import { tg } from "../../../main";
 
 interface IRequest {
   id: number;
@@ -39,7 +40,7 @@ function HomePage() {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          auth: `123`,
+          auth: tg?.initData,
         },
       });
       const res = await response.json();
@@ -55,7 +56,7 @@ function HomePage() {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
-          auth: `123`,
+          auth: tg?.initData,
         },
       });
       setRequests(requests.filter((request) => request.id !== id));

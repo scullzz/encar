@@ -7,7 +7,7 @@ import {
   CircularProgress,
 } from "@mui/material";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
-
+import { tg } from "../main";
 const SuccessPayment = () => {
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState<string | null>(null);
@@ -15,7 +15,7 @@ const SuccessPayment = () => {
   useEffect(() => {
     const fetchPaymentStatus = async () => {
       try {
-        const auth = "123";
+        const auth = tg?.initData;
 
         const lastRes = await fetch("https://api.a-b-d.ru/payhistory/last", {
           headers: {
