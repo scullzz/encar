@@ -24,6 +24,7 @@ const SuccessPayment = () => {
           },
         });
         const lastData = await lastRes.json();
+        alert(lastData);
         const invoiceId = lastData.invoice_id;
 
         const checkRes = await fetch(
@@ -37,7 +38,8 @@ const SuccessPayment = () => {
         );
         const checkData = await checkRes.json();
 
-        setStatus(checkData.status); // Если ответ строкой — покажет статус
+        alert(checkData);
+        setStatus(checkData.status);
       } catch (error) {
         console.error("Ошибка при получении статуса платежа:", error);
         setStatus("Ошибка");

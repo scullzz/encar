@@ -370,7 +370,6 @@ export default function FilterComponent() {
         </Alert>
       </Snackbar>
 
-      {/* Производитель */}
       <FormControl fullWidth>
         <InputLabel id="manufacture-label">Производитель</InputLabel>
         <Select
