@@ -195,7 +195,7 @@ function HomePage() {
                           style={{ width: "20px", marginRight: "8px" }}
                         />
                         Год: {request.date_release_from.slice(0, 4)} -{" "}
-                        {request.date_release_defor.slice(0, 4)}
+                        {request?.date_release_defor?.slice(0, 4)}
                       </Typography>
                       <Typography
                         variant="body2"
