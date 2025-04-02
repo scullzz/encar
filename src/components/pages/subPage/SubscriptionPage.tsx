@@ -79,6 +79,7 @@ function SubscriptionPage() {
 
   const ActivateSubscription = async (id: number) => {
     try {
+      alert("First1111");
       const response = await fetch("https://api.a-b-d.ru/payhistory/create", {
         method: "POST",
         headers: {
