@@ -11,6 +11,7 @@ import {
   SelectChangeEvent,
   TextField,
 } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 
 interface Values {
   [key: string]: string; // Всё храним как строки, включая даты
@@ -24,6 +25,7 @@ interface IReferenceItem {
 
 export default function FilterComponent() {
   const [values, setValues] = useState<Values>({});
+  const nav = useNavigate();
 
   // Списки для селектов
   const [manufactury, setManufactury] = useState<IReferenceItem[]>([]);
@@ -328,12 +330,11 @@ export default function FilterComponent() {
         throw new Error(`Ошибка запроса: ${response.statusText}`);
       }
 
-      const result = await response.json();
-      console.log("Успешно сохранён фильтр:", result);
-
       setSnackbarMessage("Фильтр успешно сохранён!");
       setSnackbarSeverity("success");
       setSnackbarOpen(true);
+
+      nav("/");
     } catch (err) {
       console.error("Ошибка при сохранении фильтра", err);
       setSnackbarMessage("Произошла ошибка при сохранении фильтра");
