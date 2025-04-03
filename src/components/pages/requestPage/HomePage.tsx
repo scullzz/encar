@@ -69,8 +69,7 @@ function HomePage() {
         method: "DELETE",
         headers: {
           accept: "application/json",
-          auth: "abcd-1234",
-          login: "admin",
+          auth: tg?.initData,
         },
       });
       const data = await response.json();
