@@ -75,7 +75,6 @@ function HomePage() {
       });
       const data = await response.json();
       if (data.success) {
-        // Успешное удаление
         setRequests((prev) => prev.filter((request) => request.id !== id));
         setSnackbarOpen(true);
       } else {
