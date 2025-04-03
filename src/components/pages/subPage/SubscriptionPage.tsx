@@ -181,7 +181,7 @@ function SubscriptionPage() {
                 {tariff.description}
               </Typography>
               <Typography variant="body2" sx={{ mb: 1, fontFamily: "Roboto" }}>
-                Цена: {tariff.price} ₩ <br />
+                Цена: {tariff.price} ₽<br />
                 Срок: {tariff.days_count} дней <br />
                 Фильтров в месяц: {tariff.filters_count}
               </Typography>

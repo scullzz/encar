@@ -200,7 +200,7 @@ function HomePage() {
                           alt="Cash"
                           style={{ width: "20px", marginRight: "8px" }}
                         />
-                        Цена: {request.price_from} ₩ — {request.price_defore} ₩
+                        Цена: {request.price_from} ₽ — {request.price_defore} ₽
                       </Typography>
                     </Stack>
                   </Paper>
