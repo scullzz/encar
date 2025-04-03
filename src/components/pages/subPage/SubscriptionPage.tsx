@@ -22,6 +22,17 @@ interface ISubscription {
   update_dttm: string;
 }
 
+function formatDate(dateString: string): string {
+  const date = new Date(dateString);
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const year = date.getFullYear();
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+
+  return `${day}.${month}.${year} ${hours}:${minutes}`;
+}
+
 function SubscriptionPage() {
   const tg = window.Telegram?.WebApp;
   const [subscription, setSubscription] = useState<ISubscription | null>(null);
@@ -79,7 +90,6 @@ function SubscriptionPage() {
 
   const ActivateSubscription = async (id: number) => {
     try {
-      alert("First1111");
       const response = await fetch("https://api.a-b-d.ru/payhistory/create", {
         method: "POST",
         headers: {
@@ -92,9 +102,7 @@ function SubscriptionPage() {
           email: "testEmail",
         }),
       });
-      alert("First");
       if (response.ok) {
-        alert("Seconds");
         const data = await response.json();
         const redirectUrl = data.payment_url;
 
@@ -131,16 +139,12 @@ function SubscriptionPage() {
           sx={{ borderRadius: "24px", marginBottom: "12px" }}
         >
           <CardContent>
-            <Typography
-              variant="h6"
-              gutterBottom
-              sx={{ fontFamily: "Abeezee" }}
-            >
+            <Typography variant="h6" gutterBottom sx={{ fontFamily: "Roboto" }}>
               {subscription.tariff.name || "Название не указано"}
             </Typography>
             <Typography
               className={style.subscription_description}
-              sx={{ fontFamily: "Abeezee" }}
+              sx={{ fontFamily: "Roboto" }}
             >
               {subscription.tariff.description || "Описание не указано"}
             </Typography>
@@ -150,7 +154,8 @@ function SubscriptionPage() {
               className={style.MuiButton_containedSuccess}
               sx={{ textTransform: "none", borderRadius: 2, marginTop: "12px" }}
             >
-              Активна до {subscription.subscription_end || "дата не указана"}
+              Активна до{" "}
+              {formatDate(subscription.subscription_end) || "дата не указана"}
             </Button>
           </CardContent>
         </Card>
@@ -165,17 +170,17 @@ function SubscriptionPage() {
               <Typography
                 variant="h6"
                 gutterBottom
-                sx={{ fontFamily: "Abeezee" }}
+                sx={{ fontFamily: "Roboto" }}
               >
                 {tariff.name || "Без названия"}
               </Typography>
               <Typography
                 className={style.subscription_description}
-                sx={{ fontFamily: "Abeezee" }}
+                sx={{ fontFamily: "Roboto" }}
               >
                 {tariff.description}
               </Typography>
-              <Typography variant="body2" sx={{ mb: 1, fontFamily: "Abeezee" }}>
+              <Typography variant="body2" sx={{ mb: 1, fontFamily: "Roboto" }}>
                 Цена: {tariff.price} ₩ <br />
                 Срок: {tariff.days_count} дней <br />
                 Фильтров в месяц: {tariff.filters_count}

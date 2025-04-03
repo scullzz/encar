@@ -42,7 +42,7 @@ function ContactsPage() {
     <div
       style={{
         padding: "16px",
-        fontFamily: "ABeeZee",
+        fontFamily: "Roboto",
         backgroundColor: "#f9f9f9",
         minHeight: "100vh",
         paddingBottom: "66px",

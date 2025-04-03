@@ -2,7 +2,7 @@
   padding: 16px;
   background-color: #f9f9f9;
   min-height: 100vh;
-  font-family: "ABeeZee", sans-serif;
+  font-family: "Roboto", sans-serif;
 }
 
 .subscription_card {
@@ -16,7 +16,7 @@
   color: #666;
   margin-bottom: 12px; /* Добавлен дополнительный отступ */
   font-size: 0.875rem;
-  font-family: "ABeeZee", sans-serif;
+  font-family: "Roboto", sans-serif;
   padding-left: 0.8rem; /* или другой размер по желанию */
 }
 

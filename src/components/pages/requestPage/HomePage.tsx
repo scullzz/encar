@@ -73,7 +73,6 @@ function HomePage() {
           login: "admin",
         },
       });
-
       const data = await response.json();
       if (data.success) {
         // Успешное удаление
@@ -93,7 +92,7 @@ function HomePage() {
 
   const trailingActions = (id: number) => (
     <TrailingActions>
-      <SwipeAction destructive={true} onClick={() => deleteRequest(id)}>
+      <SwipeAction destructive onClick={() => deleteRequest(id)}>
         <Box
           sx={{
             backgroundColor: "#ff3a30",
@@ -102,10 +101,10 @@ function HomePage() {
             alignItems: "center",
             justifyContent: "center",
             width: "80px",
-            height: "100%",
+            height: "90%",
+            // Cделаем углы, как у карточки
             borderTopRightRadius: "16px",
             borderBottomRightRadius: "16px",
-            boxShadow: "none",
           }}
         >
           <DeleteIcon />
@@ -116,13 +115,7 @@ function HomePage() {
 
   return (
     <>
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          height: "100vh",
-        }}
-      >
+      <Box sx={{ display: "flex", flexDirection: "column", height: "100vh" }}>
         <Box
           sx={{
             flex: 1,
@@ -141,104 +134,79 @@ function HomePage() {
           ) : (
             <SwipeableList type={ListType.IOS}>
               {requests.map((request) => (
-                <Box
+                <SwipeableListItem
                   key={request.id}
-                  sx={{
-                    position: "relative",
-                    overflow: "hidden",
-                    borderRadius: "16px",
-                    marginBottom: "12px",
-                    height: "130px",
-                  }}
+                  trailingActions={trailingActions(request.id)}
+                  fullSwipe={false}
+                  maxSwipe={0.35}
+                  listType={ListType.IOS}
                 >
-                  <Box
+                  <Paper
+                    elevation={3}
                     sx={{
-                      position: "absolute",
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      bottom: 0,
-                      backgroundColor: "#ff3a30",
+                      width: "100%", // карточка на всю ширину контейнера
+                      marginBottom: "16px", // отступ между карточками
                       borderRadius: "16px",
-                      zIndex: 0,
+                      boxShadow: "0px 4px 2px rgba(39, 39, 39, 0.1)",
+                      padding: "12px 16px",
+                      boxSizing: "border-box",
                     }}
-                  />
-
-                  <SwipeableListItem
-                    trailingActions={trailingActions(request.id)}
-                    fullSwipe={false}
-                    maxSwipe={0.35}
-                    listType={ListType.IOS}
                   >
-                    <Paper
-                      elevation={3}
-                      sx={{
-                        padding: "12px 16px",
-                        borderRadius: "16px",
-                        width: "100%",
-                        boxSizing: "border-box",
-                        position: "relative",
-                        zIndex: 1,
-                      }}
-                    >
-                      <Stack spacing={1} sx={{ fontFamily: "ABeeZee" }}>
-                        <Typography
-                          variant="body1"
-                          fontWeight="bold"
-                          sx={{ display: "flex", alignItems: "center" }}
-                        >
-                          <img
-                            src={CarIcon}
-                            alt="Car"
-                            style={{ width: "20px", marginRight: "8px" }}
-                          />
-                          № {request.id}, {request.model_name}
-                        </Typography>
-                        <Typography
-                          variant="body2"
-                          color="text.secondary"
-                          sx={{ display: "flex", alignItems: "center" }}
-                        >
-                          <img
-                            src={GraphIcon}
-                            alt="Graph"
-                            style={{ width: "20px", marginRight: "8px" }}
-                          />
-                          Пробег: {request.mileage_from} км -{" "}
-                          {request.mileage_defore} км
-                        </Typography>
-                        <Typography
-                          variant="body2"
-                          color="text.secondary"
-                          sx={{ display: "flex", alignItems: "center" }}
-                        >
-                          <img
-                            src={CalendarIcon}
-                            alt="Calendar"
-                            style={{ width: "20px", marginRight: "8px" }}
-                          />
-                          Год: {request.date_release_from?.slice(0, 4) || "N/A"}{" "}
-                          -{" "}
-                          {request?.date_release_defor?.slice(0, 4) ||
-                            new Date().getFullYear()}
-                        </Typography>
-                        <Typography
-                          variant="body2"
-                          color="text.secondary"
-                          sx={{ display: "flex", alignItems: "center" }}
-                        >
-                          <img
-                            src={CashIcon}
-                            alt="Cash"
-                            style={{ width: "20px", marginRight: "8px" }}
-                          />
-                          Цена: {request.price_from} ₩ - {request.price_defore}{" "}
-                          ₩
-                        </Typography>
-                      </Stack>
-                    </Paper>
-                  </SwipeableListItem>
-                </Box>
+                    <Stack spacing={1} sx={{ fontFamily: "Roboto" }}>
+                      <Typography
+                        variant="body1"
+                        fontWeight="bold"
+                        sx={{ display: "flex", alignItems: "center" }}
+                      >
+                        <img
+                          src={CarIcon}
+                          alt="Car"
+                          style={{ width: "20px", marginRight: "8px" }}
+                        />
+                        № {request.id}, {request.model_name}
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        sx={{ display: "flex", alignItems: "center" }}
+                      >
+                        <img
+                          src={GraphIcon}
+                          alt="Graph"
+                          style={{ width: "20px", marginRight: "8px" }}
+                        />
+                        Пробег: {request.mileage_from} км —{" "}
+                        {request.mileage_defore} км
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        sx={{ display: "flex", alignItems: "center" }}
+                      >
+                        <img
+                          src={CalendarIcon}
+                          alt="Calendar"
+                          style={{ width: "20px", marginRight: "8px" }}
+                        />
+                        Год: {request.date_release_from?.slice(0, 4) || "N/A"} —{" "}
+                        {request?.date_release_defor?.slice(0, 4) ||
+                          new Date().getFullYear()}
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        sx={{ display: "flex", alignItems: "center" }}
+                      >
+                        <img
+                          src={CashIcon}
+                          alt="Cash"
+                          style={{ width: "20px", marginRight: "8px" }}
+                        />
+                        Цена: {request.price_from} ₩ — {request.price_defore} ₩
+                      </Typography>
+                    </Stack>
+                  </Paper>
+                </SwipeableListItem>
               ))}
             </SwipeableList>
           )}
