@@ -26,10 +26,10 @@ import { tg } from "../../../main";
 
 interface IRequest {
   id: number;
-  manufacture_name: string;
-  model_name: string;
-  series_name: string;
-  equipment_name: string;
+  manufacture: string;
+  model: string;
+  series: string;
+  equipment: string;
   mileage_from: number;
   mileage_defore: number;
   price_from: number;
@@ -49,7 +49,7 @@ function HomePage() {
 
   const getRequest = async () => {
     try {
-      const response = await fetch("https://api.a-b-d.ru/filter/{user_id}", {
+      const response = await fetch("https://api.a-b-d.ru/filter/list", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -161,7 +161,7 @@ function HomePage() {
                           alt="Car"
                           style={{ width: "20px", marginRight: "8px" }}
                         />
-                        № {request.id}, {request.model_name}
+                        № {request.id}, {request.manufacture} {request.model}
                       </Typography>
                       <Typography
                         variant="body2"
