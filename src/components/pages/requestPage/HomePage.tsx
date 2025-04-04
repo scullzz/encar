@@ -100,7 +100,6 @@ function HomePage() {
             justifyContent: "center",
             width: "80px",
             height: "90%",
-            // Cделаем углы, как у карточки
             borderTopRightRadius: "16px",
             borderBottomRightRadius: "16px",
           }}
@@ -161,7 +160,7 @@ function HomePage() {
                           alt="Car"
                           style={{ width: "20px", marginRight: "8px" }}
                         />
-                        № {request.id}, {request.manufacture} {request.model}
+                        № {request.id}, {request.manufacture} {request.model} {request.series}
                       </Typography>
                       <Typography
                         variant="body2"
@@ -200,7 +199,7 @@ function HomePage() {
                           alt="Cash"
                           style={{ width: "20px", marginRight: "8px" }}
                         />
-                        Цена: {request.price_from} ₽ — {request.price_defore} ₽
+                        Цена: {request.price_from} ₩ — {request.price_defore} ₩
                       </Typography>
                     </Stack>
                   </Paper>

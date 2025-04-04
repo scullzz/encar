@@ -305,8 +305,8 @@ export default function FilterComponent() {
       mileage_defore: values["Пробег до (км)"]
         ? Number(values["Пробег до (км)"])
         : null,
-      price_from: values["Цена от ₽"] ? Number(values["Цена от ₽"]) : null,
-      price_defore: values["Цена до ₽"] ? Number(values["Цена до ₽"]) : null,
+      price_from: values["Цена от ₩"] ? Number(values["Цена от ₩"]) : null,
+      price_defore: values["Цена до ₩"] ? Number(values["Цена до ₩"]) : null,
 
       date_release_from: values["date_release_from"]
         ? new Date(values["date_release_from"]).toISOString()
@@ -515,21 +515,21 @@ export default function FilterComponent() {
       <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
         <TextField
           id="price-from"
-          label="Цена от ₽"
+          label="Цена от ₩"
           type="number"
           fullWidth
-          value={values["Цена от ₽"] || ""}
-          onChange={(e) => handleInputChange(e, "Цена от ₽")}
+          value={values["Цена от ₩"] || ""}
+          onChange={(e) => handleInputChange(e, "Цена от ₩")}
           sx={{ borderRadius: "16px" }}
           InputLabelProps={{ shrink: true }}
         />
         <TextField
           id="price-to"
-          label="Цена до ₽"
+          label="Цена до ₩"
           type="number"
           fullWidth
-          value={values["Цена до ₽"] || ""}
-          onChange={(e) => handleInputChange(e, "Цена до ₽")}
+          value={values["Цена до ₩"] || ""}
+          onChange={(e) => handleInputChange(e, "Цена до ₩")}
           sx={{ borderRadius: "16px" }}
           InputLabelProps={{ shrink: true }}
         />

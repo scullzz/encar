@@ -105,7 +105,6 @@ function SubscriptionPage() {
       if (response.ok) {
         const data = await response.json();
         const redirectUrl = data.payment_url;
-
         window.location.href = redirectUrl;
       }
     } catch (err) {
@@ -123,16 +122,8 @@ function SubscriptionPage() {
       className={style.subscription_container}
       style={{ overflow: "hidden" }}
     >
-      {noSubscriptionMessage && (
-        <Typography
-          variant="h6"
-          sx={{ textAlign: "center", color: "gray", marginBottom: "12px" }}
-        >
-          {noSubscriptionMessage}
-        </Typography>
-      )}
-
-      {subscription ? (
+      {/* Если есть активная подписка */}
+      {subscription && (
         <Card
           key={subscription.id}
           className={style.subscription_card}
@@ -159,49 +150,63 @@ function SubscriptionPage() {
             </Button>
           </CardContent>
         </Card>
-      ) : (
-        tariffs.map((tariff) => (
-          <Card
-            key={tariff.id}
-            className={style.subscription_card}
-            sx={{ borderRadius: "24px", marginBottom: "12px" }}
-          >
-            <CardContent>
-              <Typography
-                variant="h6"
-                gutterBottom
-                sx={{ fontFamily: "Roboto" }}
-              >
-                {tariff.name || "Без названия"}
-              </Typography>
-              <Typography
-                className={style.subscription_description}
-                sx={{ fontFamily: "Roboto" }}
-              >
-                {tariff.description}
-              </Typography>
-              <Typography variant="body2" sx={{ mb: 1, fontFamily: "Roboto" }}>
-                Цена: {tariff.price} ₽<br />
-                Срок: {tariff.days_count} дней <br />
-                Фильтров в месяц: {tariff.filters_count}
-              </Typography>
-              <Button
-                onClick={() => ActivateSubscription(tariff.id)}
-                variant="contained"
-                color="primary"
-                className={style.MuiButton_containedPrimary}
-                sx={{
-                  textTransform: "none",
-                  borderRadius: 2,
-                  marginTop: "12px",
-                }}
-              >
-                Активировать
-              </Button>
-            </CardContent>
-          </Card>
-        ))
       )}
+
+      {/* Если подписка не найдена (noSubscriptionMessage) */}
+      {!subscription && noSubscriptionMessage && (
+        <Typography
+          variant="h6"
+          sx={{ textAlign: "center", color: "gray", marginBottom: "12px" }}
+        >
+          {noSubscriptionMessage}
+        </Typography>
+      )}
+
+      {/* Всегда показываем список тарифов */}
+      <Typography
+        variant="h6"
+        sx={{ marginBottom: "12px", textAlign: "center" }}
+      >
+        Тарифы
+      </Typography>
+
+      {tariffs.map((tariff) => (
+        <Card
+          key={tariff.id}
+          className={style.subscription_card}
+          sx={{ borderRadius: "24px", marginBottom: "12px" }}
+        >
+          <CardContent>
+            <Typography variant="h6" gutterBottom sx={{ fontFamily: "Roboto" }}>
+              {tariff.name || "Без названия"}
+            </Typography>
+            <Typography
+              className={style.subscription_description}
+              sx={{ fontFamily: "Roboto" }}
+            >
+              {tariff.description}
+            </Typography>
+            <Typography variant="body2" sx={{ mb: 1, fontFamily: "Roboto" }}>
+              Цена: {tariff.price} ₽<br />
+              Срок: {tariff.days_count} дней <br />
+              Фильтров в месяц: {tariff.filters_count}
+            </Typography>
+            <Button
+              onClick={() => ActivateSubscription(tariff.id)}
+              variant="contained"
+              color="primary"
+              className={style.MuiButton_containedPrimary}
+              sx={{
+                textTransform: "none",
+                borderRadius: 2,
+                marginTop: "12px",
+              }}
+            >
+              Активировать
+            </Button>
+          </CardContent>
+        </Card>
+      ))}
     </div>
   );
 }
