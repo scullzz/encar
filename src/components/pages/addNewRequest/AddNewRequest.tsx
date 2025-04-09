@@ -294,6 +294,12 @@ export default function FilterComponent() {
   };
 
   const handleSave = async () => {
+    if (!values["Производитель"] || !values["Модель"] || !values["Серия"]) {
+      setSnackbarMessage("Пожалуйста, заполните обязательные поля");
+      setSnackbarSeverity("error");
+      setSnackbarOpen(true);
+      return;
+    }
     const payload = {
       manufacture_id: values["Производитель"]
         ? Number(values["Производитель"])
