@@ -160,7 +160,8 @@ function HomePage() {
                           alt="Car"
                           style={{ width: "20px", marginRight: "8px" }}
                         />
-                        № {request.id}, {request.manufacture} {request.model} {request.series}
+                        № {request.id}, {request.manufacture} {request.model}{" "}
+                        {request.series}
                       </Typography>
                       <Typography
                         variant="body2"

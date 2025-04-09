@@ -33,6 +33,7 @@ export default function FilterComponent() {
   const [series, setSeries] = useState<IReferenceItem[]>([]);
   const [complectation, setComplectation] = useState<IReferenceItem[]>([]);
   const [engine, setEngine] = useState<IReferenceItem[]>([]);
+  const [driveType, setDriveType] = useState<IReferenceItem[]>([]);
   const [color, setColor] = useState<IReferenceItem[]>([]);
 
   const [snackbarOpen, setSnackbarOpen] = useState(false);
@@ -137,6 +138,26 @@ export default function FilterComponent() {
     }
   };
 
+  // Новая функция для получения типов привода
+  const getDriveType = async () => {
+    try {
+      const response = await fetch(
+        `https://api.a-b-d.ru/references/driveType`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            auth: tg?.initData,
+          },
+        }
+      );
+      const res = await response.json();
+      setDriveType(res);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   const getColor = async () => {
     try {
       const response = await fetch(`https://api.a-b-d.ru/references/carColor`, {
@@ -157,6 +178,7 @@ export default function FilterComponent() {
   useEffect(() => {
     getManufacturers();
     getEngine();
+    getDriveType();
     getColor();
   }, []);
 
@@ -187,15 +209,12 @@ export default function FilterComponent() {
     switch (field) {
       case "Производитель":
         if (selectedId) {
-          // Сначала сбрасываем все связанные поля
+          // Сбрасываем связанные поля
           setModel([]);
           setSeries([]);
           setComplectation([]);
 
-          // Загружаем новый список моделей
           await getModel(Number(selectedId));
-
-          // Обновляем state
           setValues((prev) => ({
             ...prev,
             Производитель: selectedId,
@@ -204,7 +223,6 @@ export default function FilterComponent() {
             Комплектация: "",
           }));
         } else {
-          // Если пользователь сбросил «Производителя»
           setModel([]);
           setSeries([]);
           setComplectation([]);
@@ -224,16 +242,10 @@ export default function FilterComponent() {
           setValues((prev) => ({ ...prev, Модель: "" }));
           return;
         }
-
         if (selectedId) {
-          // Сначала сбрасываем всё, что зависит от модели
           setSeries([]);
           setComplectation([]);
-
-          // Загружаем список серий
           await getSeriece(Number(selectedId));
-
-          // Обновляем state
           setValues((prev) => ({
             ...prev,
             Модель: selectedId,
@@ -258,12 +270,9 @@ export default function FilterComponent() {
           setValues((prev) => ({ ...prev, Серия: "" }));
           return;
         }
-
         if (selectedId) {
           setComplectation([]);
           await getComplectation(Number(selectedId));
-
-          // Обновляем state
           setValues((prev) => ({
             ...prev,
             Серия: selectedId,
@@ -295,10 +304,12 @@ export default function FilterComponent() {
         ? Number(values["Комплектация"])
         : null,
       engine_type_id: values["Двигатель"] ? Number(values["Двигатель"]) : null,
+      drive_type_id: values["Тип привода"]
+        ? Number(values["Тип привода"])
+        : null,
       car_color_id: values["Цвет кузова"]
         ? Number(values["Цвет кузова"])
         : null,
-
       mileage_from: values["Пробег от (км)"]
         ? Number(values["Пробег от (км)"])
         : null,
@@ -307,7 +318,6 @@ export default function FilterComponent() {
         : null,
       price_from: values["Цена от ₩"] ? Number(values["Цена от ₩"]) : null,
       price_defore: values["Цена до ₩"] ? Number(values["Цена до ₩"]) : null,
-
       date_release_from: values["date_release_from"]
         ? new Date(values["date_release_from"]).toISOString()
         : null,
@@ -371,7 +381,8 @@ export default function FilterComponent() {
         </Alert>
       </Snackbar>
 
-      <FormControl fullWidth>
+      {/* Производитель (обязательное поле) */}
+      <FormControl fullWidth required>
         <InputLabel id="manufacture-label">Производитель</InputLabel>
         <Select
           labelId="manufacture-label"
@@ -389,8 +400,8 @@ export default function FilterComponent() {
         </Select>
       </FormControl>
 
-      {/* Модель */}
-      <FormControl fullWidth>
+      {/* Модель (обязательное поле) */}
+      <FormControl fullWidth required>
         <InputLabel id="model-label">Модель</InputLabel>
         <Select
           labelId="model-label"
@@ -409,8 +420,8 @@ export default function FilterComponent() {
         </Select>
       </FormControl>
 
-      {/* Серия */}
-      <FormControl fullWidth>
+      {/* Серия (обязательное поле) */}
+      <FormControl fullWidth required>
         <InputLabel id="series-label">Серия</InputLabel>
         <Select
           labelId="series-label"
@@ -461,6 +472,25 @@ export default function FilterComponent() {
           sx={{ borderRadius: "16px" }}
         >
           {engine.map((item) => (
+            <MenuItem key={item.id} value={String(item.id)}>
+              {item.translated || item.name}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+
+      {/* Тип привода (новое поле) */}
+      <FormControl fullWidth>
+        <InputLabel id="drive-label">Тип привода</InputLabel>
+        <Select
+          labelId="drive-label"
+          id="drive-select"
+          value={values["Тип привода"] || ""}
+          onChange={(e) => handleChange(e, "Тип привода")}
+          label="Тип привода"
+          sx={{ borderRadius: "16px" }}
+        >
+          {driveType.map((item) => (
             <MenuItem key={item.id} value={String(item.id)}>
               {item.translated || item.name}
             </MenuItem>
