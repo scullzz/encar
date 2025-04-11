@@ -12,6 +12,7 @@ import {
   TextField,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import WheelDatePicker from "./DateWheelPicker";
 
 interface Values {
   [key: string]: string; // Всё храним как строки, включая даты
@@ -26,6 +27,8 @@ interface IReferenceItem {
 export default function FilterComponent() {
   const [values, setValues] = useState<Values>({});
   const nav = useNavigate();
+  const [showWheelFrom, setShowWheelFrom] = useState(false);
+  const [showWheelTo, setShowWheelTo] = useState(false);
 
   // Списки для селектов
   const [manufactury, setManufactury] = useState<IReferenceItem[]>([]);
@@ -574,22 +577,23 @@ export default function FilterComponent() {
       {/* Даты выпуска */}
       <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
         <TextField
-          id="date-release-from"
           label="Дата выпуска от"
-          type="date"
-          fullWidth
           value={values["date_release_from"] || ""}
-          onChange={(e) => handleInputChange(e, "date_release_from")}
-          InputLabelProps={{ shrink: true }}
-        />
-        <TextField
-          id="date-release-to"
-          label="Дата выпуска до"
-          type="date"
           fullWidth
-          value={values["date_release_defor"] || ""}
-          onChange={(e) => handleInputChange(e, "date_release_defor")}
+          onFocus={() => setShowWheelFrom(true)}
+          sx={{ borderRadius: "16px" }}
           InputLabelProps={{ shrink: true }}
+          inputProps={{ readOnly: true }}
+        />
+
+        <TextField
+          label="Дата выпуска до"
+          value={values["date_release_defor"] || ""}
+          fullWidth
+          onFocus={() => setShowWheelTo(true)}
+          sx={{ borderRadius: "16px" }}
+          InputLabelProps={{ shrink: true }}
+          inputProps={{ readOnly: true }}
         />
       </Box>
 
@@ -606,6 +610,25 @@ export default function FilterComponent() {
       >
         Сохранить
       </Button>
+
+      {showWheelFrom && (
+        <WheelDatePicker
+          onChange={(dateStr) => {
+            setValues((prev) => ({ ...prev, date_release_from: dateStr }));
+            setShowWheelFrom(false);
+          }}
+          onCancel={() => setShowWheelFrom(false)}
+        />
+      )}
+      {showWheelTo && (
+        <WheelDatePicker
+          onChange={(dateStr) => {
+            setValues((prev) => ({ ...prev, date_release_defor: dateStr }));
+            setShowWheelTo(false);
+          }}
+          onCancel={() => setShowWheelTo(false)}
+        />
+      )}
     </Box>
   );
 }
