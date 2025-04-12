@@ -1,11 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "./WheelDatePicker.css";
 
 const years = Array.from({ length: 50 }, (_, i) => `${1980 + i}`);
 const months = Array.from({ length: 12 }, (_, i) =>
   `${i + 1}`.padStart(2, "0")
 );
-const days = Array.from({ length: 31 }, (_, i) => `${i + 1}`.padStart(2, "0"));
 
 export default function WheelDatePicker({
   onChange,
@@ -16,7 +15,14 @@ export default function WheelDatePicker({
 }) {
   const [year, setYear] = useState("2000");
   const [month, setMonth] = useState("01");
+
+  // Дефолтное значение дня — первое число
   const [day, setDay] = useState("01");
+
+  useEffect(() => {
+    // При изменении месяца сбрасываем день на 01
+    setDay("01");
+  }, [month]);
 
   const handleSubmit = () => {
     onChange(`${day}/${month}/${year}`); // формат dd/mm/yyyy
@@ -28,6 +34,7 @@ export default function WheelDatePicker({
 
       <div className="wheel-selectors">
         <div className="wheel-column">
+          <div className="wheel-label">Год</div>
           <div className="wheel-inner">
             {years.map((y) => (
               <div
@@ -40,7 +47,9 @@ export default function WheelDatePicker({
             ))}
           </div>
         </div>
+
         <div className="wheel-column">
+          <div className="wheel-label">Месяц</div>
           <div className="wheel-inner">
             {months.map((m) => (
               <div
@@ -49,19 +58,6 @@ export default function WheelDatePicker({
                 onClick={() => setMonth(m)}
               >
                 {m}
-              </div>
-            ))}
-          </div>
-        </div>
-        <div className="wheel-column">
-          <div className="wheel-inner">
-            {days.map((d) => (
-              <div
-                key={d}
-                className={`wheel-item ${d === day ? "selected" : ""}`}
-                onClick={() => setDay(d)}
-              >
-                {d}
               </div>
             ))}
           </div>

@@ -24,7 +24,6 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  animation: slideUp 0.3s ease-out;
 }
 
 .wheel-title {
