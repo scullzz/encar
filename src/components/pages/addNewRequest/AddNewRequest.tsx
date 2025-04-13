@@ -490,7 +490,7 @@ export default function FilterComponent() {
 
       {/* Тип привода (новое поле) */}
       <FormControl fullWidth>
-        <InputLabel id="drive-label">Тип привода</InputLabel>
+        <InputLabel id="drive-label">Трансмиссия</InputLabel>
         <Select
           labelId="drive-label"
           id="drive-select"
