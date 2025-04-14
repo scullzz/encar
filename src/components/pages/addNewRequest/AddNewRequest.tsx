@@ -431,7 +431,7 @@ export default function FilterComponent() {
 
       {/* Серия (обязательное поле) */}
       <FormControl fullWidth required>
-        <InputLabel id="series-label">Серия</InputLabel>
+        <InputLabel id="series-label">Модель</InputLabel>
         <Select
           labelId="series-label"
           id="series-select"
