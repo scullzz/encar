@@ -233,8 +233,13 @@ export default function FilterComponent() {
       return;
     }
 
-    const stripZ = (iso: string) => iso.replace(/Z$/, "");
-
+    const stripZ = (iso: string): string => {
+      const m = iso.match(/^(\d{4})-(\d{1,2})/);
+      if (!m) return iso;
+      const year = m[1];
+      const month = m[2].padStart(2, "0");
+      return `${year}-${month}-01`;
+    };
     const payload = {
       manufacture_id: Number(values["Производитель"] as string),
       model_id: Number(values["Модель"] as string),

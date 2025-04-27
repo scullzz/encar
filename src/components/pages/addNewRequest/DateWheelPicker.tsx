@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import "./WheelDatePicker.css";
 
+// Список годов и месяцев
 const years = Array.from({ length: 21 }, (_, i) => `${2010 + i}`);
 const months = Array.from({ length: 12 }, (_, i) =>
   `${i + 1}`.padStart(2, "0")
@@ -10,29 +11,27 @@ export default function WheelDatePicker({
   onChange,
   onCancel,
 }: {
-  onChange: (date: string) => void;
+  onChange: (date: string) => void; // получим "YYYY-MM"
   onCancel: () => void;
 }) {
-  const [year, setYear] = useState("2010");
-  const [month, setMonth] = useState("01");
-
-  // Дефолтное значение дня — первое число
-  const [day, setDay] = useState("01");
-
-  useEffect(() => {
-    // При изменении месяца сбрасываем день на 01
-    setDay("01");
-  }, [month]);
+  // По умолчанию можно поставить текущий год/месяц
+  const now = new Date();
+  const [year, setYear] = useState(String(now.getFullYear()));
+  const [month, setMonth] = useState(
+    String(now.getMonth() + 1).padStart(2, "0")
+  );
 
   const handleSubmit = () => {
-    onChange(`${day}/${month}/${year}`); // формат dd/mm/yyyy
+    // Only year-month
+    onChange(`${year}-${month}`);
   };
 
   return (
     <div className="wheel-overlay">
-      <div className="wheel-title">Выберите дату</div>
+      <div className="wheel-title">Выберите год и месяц</div>
 
       <div className="wheel-selectors">
+        {/* Колонка с годами */}
         <div className="wheel-column">
           <div className="wheel-label">Год</div>
           <div className="wheel-inner">
@@ -48,6 +47,7 @@ export default function WheelDatePicker({
           </div>
         </div>
 
+        {/* Колонка с месяцами */}
         <div className="wheel-column">
           <div className="wheel-label">Месяц</div>
           <div className="wheel-inner">
