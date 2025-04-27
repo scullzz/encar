@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import "./WheelDatePicker.css";
 
-const years = Array.from({ length: 50 }, (_, i) => `${1980 + i}`);
+const years = Array.from({ length: 21 }, (_, i) => `${2010 + i}`);
 const months = Array.from({ length: 12 }, (_, i) =>
   `${i + 1}`.padStart(2, "0")
 );
@@ -13,7 +13,7 @@ export default function WheelDatePicker({
   onChange: (date: string) => void;
   onCancel: () => void;
 }) {
-  const [year, setYear] = useState("2000");
+  const [year, setYear] = useState("2010");
   const [month, setMonth] = useState("01");
 
   // Дефолтное значение дня — первое число

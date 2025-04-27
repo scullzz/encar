@@ -110,6 +110,15 @@ function HomePage() {
     </TrailingActions>
   );
 
+  // Функция форматирования "MM.YYYY"
+  const formatMonthYear = (dateStr?: string): string => {
+    if (!dateStr) return "";
+    const date = new Date(dateStr);
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+    return `${month}.${year}`;
+  };
+
   return (
     <>
       <Box sx={{ display: "flex", flexDirection: "column", height: "100vh" }}>
@@ -141,8 +150,8 @@ function HomePage() {
                   <Paper
                     elevation={3}
                     sx={{
-                      width: "100%", // карточка на всю ширину контейнера
-                      marginBottom: "16px", // отступ между карточками
+                      width: "100%",
+                      marginBottom: "16px",
                       borderRadius: "16px",
                       boxShadow: "0px 4px 2px rgba(39, 39, 39, 0.1)",
                       padding: "12px 16px",
@@ -186,9 +195,14 @@ function HomePage() {
                           alt="Calendar"
                           style={{ width: "20px", marginRight: "8px" }}
                         />
-                        Год: {request.date_release_from?.slice(0, 4) || "N/A"} —{" "}
-                        {request?.date_release_defor?.slice(0, 4) ||
-                          new Date().getFullYear()}
+                        Год:{" "}
+                        {request.date_release_from
+                          ? formatMonthYear(request.date_release_from)
+                          : "N/A"}{" "}
+                        —{" "}
+                        {request.date_release_defor
+                          ? formatMonthYear(request.date_release_defor)
+                          : formatMonthYear(new Date().toISOString())}
                       </Typography>
                       <Typography
                         variant="body2"

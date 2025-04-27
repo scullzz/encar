@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { Snackbar, Alert } from "@mui/material";
-import { tg } from "../../../main";
 import {
+  Snackbar,
+  Alert,
   FormControl,
   InputLabel,
   Select,
@@ -11,11 +11,12 @@ import {
   SelectChangeEvent,
   TextField,
 } from "@mui/material";
+import { tg } from "../../../main";
 import { useNavigate } from "react-router-dom";
 import WheelDatePicker from "./DateWheelPicker";
 
 interface Values {
-  [key: string]: string; // Всё храним как строки, включая даты
+  [key: string]: string | string[];
 }
 
 interface IReferenceItem {
@@ -24,13 +25,18 @@ interface IReferenceItem {
   translated: string;
 }
 
-export default function FilterComponent() {
-  const [values, setValues] = useState<Values>({});
-  const nav = useNavigate();
-  const [showWheelFrom, setShowWheelFrom] = useState(false);
-  const [showWheelTo, setShowWheelTo] = useState(false);
+// ограничение размеров выпадающих списков
+const menuProps = {
+  PaperProps: {
+    style: {
+      maxHeight: 200,
+      width: 240,
+    },
+  },
+};
 
-  // Списки для селектов
+export default function FilterComponent() {
+  const [values, setValues] = useState<Values>({ Комплектация: [] });
   const [manufactury, setManufactury] = useState<IReferenceItem[]>([]);
   const [model, setModel] = useState<IReferenceItem[]>([]);
   const [series, setSeries] = useState<IReferenceItem[]>([]);
@@ -38,6 +44,8 @@ export default function FilterComponent() {
   const [engine, setEngine] = useState<IReferenceItem[]>([]);
   const [driveType, setDriveType] = useState<IReferenceItem[]>([]);
   const [color, setColor] = useState<IReferenceItem[]>([]);
+  const [showWheelFrom, setShowWheelFrom] = useState(false);
+  const [showWheelTo, setShowWheelTo] = useState(false);
 
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
@@ -45,139 +53,8 @@ export default function FilterComponent() {
     "success"
   );
 
-  // =========== FETCH ФУНКЦИИ ============
-  const getManufacturers = async () => {
-    try {
-      const response = await fetch(
-        "https://api.a-b-d.ru/references/manufactury",
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            auth: tg?.initData,
-          },
-        }
-      );
-      const res = await response.json();
-      setManufactury(res);
-    } catch (err) {
-      console.log(err);
-    }
-  };
+  const nav = useNavigate();
 
-  const getModel = async (manufacturyId: number) => {
-    try {
-      const response = await fetch(
-        `https://api.a-b-d.ru/references/model/${manufacturyId}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            auth: tg?.initData,
-          },
-        }
-      );
-      const res = await response.json();
-      setModel(res);
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
-  const getSeriece = async (modelId: number) => {
-    try {
-      const response = await fetch(
-        `https://api.a-b-d.ru/references/series/${modelId}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            auth: tg?.initData,
-          },
-        }
-      );
-      const res = await response.json();
-      setSeries(res);
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
-  const getComplectation = async (seriesId: number) => {
-    try {
-      const response = await fetch(
-        `https://api.a-b-d.ru/references/equipment/${seriesId}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            auth: tg?.initData,
-          },
-        }
-      );
-      const res = await response.json();
-      setComplectation(res);
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
-  const getEngine = async () => {
-    try {
-      const response = await fetch(
-        `https://api.a-b-d.ru/references/engineType`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            auth: tg?.initData,
-          },
-        }
-      );
-      const res = await response.json();
-      setEngine(res);
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
-  // Новая функция для получения типов привода
-  const getDriveType = async () => {
-    try {
-      const response = await fetch(
-        `https://api.a-b-d.ru/references/driveType`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            auth: tg?.initData,
-          },
-        }
-      );
-      const res = await response.json();
-      setDriveType(res);
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
-  const getColor = async () => {
-    try {
-      const response = await fetch(`https://api.a-b-d.ru/references/carColor`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          auth: tg?.initData,
-        },
-      });
-      const res = await response.json();
-      setColor(res);
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
-  // Подгружаем часть справочников при первом рендере
   useEffect(() => {
     getManufacturers();
     getEngine();
@@ -185,115 +62,167 @@ export default function FilterComponent() {
     getColor();
   }, []);
 
-  // =========== ОБРАБОТЧИКИ ВВОДА ============
+  const formatMonthYear = (iso: string): string => {
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return "";
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const year = d.getFullYear();
+    return `${month}/${year}`;
+  };
+
+  async function getManufacturers() {
+    try {
+      const res = await fetch("https://api.a-b-d.ru/references/manufactury", {
+        headers: {
+          "Content-Type": "application/json",
+          auth: tg?.initData,
+        },
+      }).then((r) => r.json());
+      setManufactury(res);
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
+  async function getModel(id: number) {
+    try {
+      const res = await fetch(`https://api.a-b-d.ru/references/model/${id}`, {
+        headers: {
+          "Content-Type": "application/json",
+          auth: tg?.initData,
+        },
+      }).then((r) => r.json());
+      setModel(res);
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
+  async function getSeriece(id: number) {
+    try {
+      const res = await fetch(`https://api.a-b-d.ru/references/series/${id}`, {
+        headers: {
+          "Content-Type": "application/json",
+          auth: tg?.initData,
+        },
+      }).then((r) => r.json());
+      setSeries(res);
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
+  async function getComplectation(id: number) {
+    try {
+      const res = await fetch(
+        `https://api.a-b-d.ru/references/equipment/${id}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            auth: tg?.initData,
+          },
+        }
+      ).then((r) => r.json());
+      setComplectation(res);
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
+  async function getEngine() {
+    try {
+      const res = await fetch(`https://api.a-b-d.ru/references/engineType`, {
+        headers: {
+          "Content-Type": "application/json",
+          auth: tg?.initData,
+        },
+      }).then((r) => r.json());
+      setEngine(res);
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
+  async function getDriveType() {
+    try {
+      const res = await fetch(`https://api.a-b-d.ru/references/driveType`, {
+        headers: {
+          "Content-Type": "application/json",
+          auth: tg?.initData,
+        },
+      }).then((r) => r.json());
+      setDriveType(res);
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
+  async function getColor() {
+    try {
+      const res = await fetch(`https://api.a-b-d.ru/references/carColor`, {
+        headers: {
+          "Content-Type": "application/json",
+          auth: tg?.initData,
+        },
+      }).then((r) => r.json());
+      setColor(res);
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
     field: string
   ) => {
-    setValues((prev) => ({
-      ...prev,
-      [field]: e.target.value,
-    }));
+    setValues((prev) => ({ ...prev, [field]: e.target.value }));
   };
 
   const handleChange = async (
     event: SelectChangeEvent<string>,
     field: string
   ) => {
-    const selectedId = event.target.value; // строка
-
-    // Записываем новое значение в values
-    setValues((prev) => ({
-      ...prev,
-      [field]: selectedId,
-    }));
-
-    // Логика цепочек:
+    const selectedId = event.target.value;
+    setValues((prev) => ({ ...prev, [field]: selectedId }));
     switch (field) {
       case "Производитель":
+        setModel([]);
+        setSeries([]);
+        setComplectation([]);
         if (selectedId) {
-          // Сбрасываем связанные поля
-          setModel([]);
-          setSeries([]);
-          setComplectation([]);
-
           await getModel(Number(selectedId));
-          setValues((prev) => ({
-            ...prev,
-            Производитель: selectedId,
-            Модель: "",
-            Серия: "",
-            Комплектация: "",
-          }));
-        } else {
-          setModel([]);
-          setSeries([]);
-          setComplectation([]);
-          setValues((prev) => ({
-            ...prev,
-            Производитель: "",
-            Модель: "",
-            Серия: "",
-            Комплектация: "",
-          }));
         }
+        setValues((prev) => ({
+          ...prev,
+          Модель: "",
+          Серия: "",
+          Комплектация: [],
+        }));
         break;
-
       case "Модель":
-        if (!values["Производитель"]) {
-          alert("Сначала выберите производителя");
-          setValues((prev) => ({ ...prev, Модель: "" }));
-          return;
-        }
+        setSeries([]);
+        setComplectation([]);
         if (selectedId) {
-          setSeries([]);
-          setComplectation([]);
           await getSeriece(Number(selectedId));
-          setValues((prev) => ({
-            ...prev,
-            Модель: selectedId,
-            Серия: "",
-            Комплектация: "",
-          }));
-        } else {
-          setSeries([]);
-          setComplectation([]);
-          setValues((prev) => ({
-            ...prev,
-            Модель: "",
-            Серия: "",
-            Комплектация: "",
-          }));
         }
+        setValues((prev) => ({ ...prev, Серия: "", Комплектация: [] }));
         break;
-
       case "Серия":
-        if (!values["Модель"]) {
-          alert("Сначала выберите модель");
-          setValues((prev) => ({ ...prev, Серия: "" }));
-          return;
-        }
+        setComplectation([]);
         if (selectedId) {
-          setComplectation([]);
           await getComplectation(Number(selectedId));
-          setValues((prev) => ({
-            ...prev,
-            Серия: selectedId,
-            Комплектация: "",
-          }));
-        } else {
-          setComplectation([]);
-          setValues((prev) => ({
-            ...prev,
-            Серия: "",
-            Комплектация: "",
-          }));
         }
-        break;
-
-      default:
+        setValues((prev) => ({ ...prev, Комплектация: [] }));
         break;
     }
+  };
+
+  const handleMultiChange = (
+    event: SelectChangeEvent<string[]>,
+    field: string
+  ) => {
+    const arr = event.target.value as string[];
+    setValues((prev) => ({ ...prev, [field]: arr }));
   };
 
   const handleSave = async () => {
@@ -303,35 +232,42 @@ export default function FilterComponent() {
       setSnackbarOpen(true);
       return;
     }
+
+    const stripZ = (iso: string) => iso.replace(/Z$/, "");
+
     const payload = {
-      manufacture_id: values["Производитель"]
-        ? Number(values["Производитель"])
+      manufacture_id: Number(values["Производитель"] as string),
+      model_id: Number(values["Модель"] as string),
+      series_id: Number(values["Серия"] as string),
+      equipment_ids: (values["Комплектация"] as string[]).map((v) => Number(v)),
+      engine_type_id: values["Двигатель"]
+        ? Number(values["Двигатель"] as string)
         : null,
-      model_id: values["Модель"] ? Number(values["Модель"]) : null,
-      series_id: values["Серия"] ? Number(values["Серия"]) : null,
-      equipment_id: values["Комплектация"]
-        ? Number(values["Комплектация"])
-        : null,
-      engine_type_id: values["Двигатель"] ? Number(values["Двигатель"]) : null,
       drive_type_id: values["Тип привода"]
-        ? Number(values["Тип привода"])
+        ? Number(values["Тип привода"] as string)
         : null,
       car_color_id: values["Цвет кузова"]
-        ? Number(values["Цвет кузова"])
+        ? Number(values["Цвет кузова"] as string)
         : null,
       mileage_from: values["Пробег от (км)"]
-        ? Number(values["Пробег от (км)"])
+        ? Number(values["Пробег от (км)"] as string)
         : null,
       mileage_defore: values["Пробег до (км)"]
-        ? Number(values["Пробег до (км)"])
+        ? Number(values["Пробег до (км)"] as string)
         : null,
-      price_from: values["Цена от ₩"] ? Number(values["Цена от ₩"]) : null,
-      price_defore: values["Цена до ₩"] ? Number(values["Цена до ₩"]) : null,
+      price_from: values["Цена от ₩"]
+        ? Number(values["Цена от ₩"] as string)
+        : null,
+      price_defore: values["Цена до ₩"]
+        ? Number(values["Цена до ₩"] as string)
+        : null,
       date_release_from: values["date_release_from"]
-        ? new Date(values["date_release_from"]).toISOString()
+        ? stripZ(new Date(values["date_release_from"] as string).toISOString())
         : null,
-      date_release_defor: values["date_release_defor"]
-        ? new Date(values["date_release_defor"]).toISOString()
+      date_release_defore: values["date_release_defore"]
+        ? stripZ(
+            new Date(values["date_release_defore"] as string).toISOString()
+          )
         : null,
     };
 
@@ -344,18 +280,13 @@ export default function FilterComponent() {
         },
         body: JSON.stringify(payload),
       });
-
-      if (!response.ok) {
-        throw new Error(`Ошибка запроса: ${response.statusText}`);
-      }
-
+      if (!response.ok) throw new Error(response.statusText);
       setSnackbarMessage("Фильтр успешно сохранён!");
       setSnackbarSeverity("success");
       setSnackbarOpen(true);
-
       nav("/");
     } catch (err) {
-      console.error("Ошибка при сохранении фильтра", err);
+      console.error(err);
       setSnackbarMessage("Произошла ошибка при сохранении фильтра");
       setSnackbarSeverity("error");
       setSnackbarOpen(true);
@@ -390,80 +321,88 @@ export default function FilterComponent() {
         </Alert>
       </Snackbar>
 
-      {/* Производитель (обязательное поле) */}
+      {/* Производитель */}
       <FormControl fullWidth required>
-        <InputLabel id="manufacture-label">Производитель</InputLabel>
+        <InputLabel>Производитель</InputLabel>
         <Select
-          labelId="manufacture-label"
-          id="manufacture-select"
-          value={values["Производитель"] || ""}
+          value={(values["Производитель"] as string) || ""}
           onChange={(e) => handleChange(e, "Производитель")}
-          sx={{ borderRadius: "16px" }}
           label="Производитель"
+          MenuProps={menuProps}
+          sx={{ borderRadius: 2 }}
         >
-          {manufactury.map((item) => (
-            <MenuItem key={item.id} value={String(item.id)}>
-              {item.translated || item.name}
+          {manufactury.map((i) => (
+            <MenuItem key={i.id} value={String(i.id)}>
+              {i.translated || i.name}
             </MenuItem>
           ))}
         </Select>
       </FormControl>
 
-      {/* Модель (обязательное поле) */}
+      {/* Модель */}
       <FormControl fullWidth required>
-        <InputLabel id="model-label">Модель</InputLabel>
+        <InputLabel>Модель</InputLabel>
         <Select
-          labelId="model-label"
-          id="model-select"
-          disabled={!values["Производитель"]}
-          value={values["Модель"] || ""}
+          value={(values["Модель"] as string) || ""}
           onChange={(e) => handleChange(e, "Модель")}
+          disabled={!values["Производитель"]}
           label="Модель"
-          sx={{ borderRadius: "16px" }}
+          MenuProps={menuProps}
+          sx={{ borderRadius: 2 }}
         >
-          {model.map((item) => (
-            <MenuItem key={item.id} value={String(item.id)}>
-              {item.translated || item.name}
+          {model.map((i) => (
+            <MenuItem key={i.id} value={String(i.id)}>
+              {i.translated || i.name}
             </MenuItem>
           ))}
         </Select>
       </FormControl>
 
-      {/* Серия (обязательное поле) */}
+      {/* Серия */}
       <FormControl fullWidth required>
-        <InputLabel id="series-label">Модельный год</InputLabel>
+        <InputLabel>Модельный год</InputLabel>
         <Select
-          labelId="series-label"
-          id="series-select"
-          disabled={!values["Модель"]}
-          value={values["Серия"] || ""}
+          value={(values["Серия"] as string) || ""}
           onChange={(e) => handleChange(e, "Серия")}
-          label="Серия"
-          sx={{ borderRadius: "16px" }}
+          disabled={!values["Модель"]}
+          label="Модельный год"
+          MenuProps={menuProps}
+          sx={{ borderRadius: 2 }}
         >
-          {series.map((item) => (
-            <MenuItem key={item.id} value={String(item.id)}>
-              {item.translated || item.name}
+          {series.map((i) => (
+            <MenuItem key={i.id} value={String(i.id)}>
+              {i.translated || i.name}
             </MenuItem>
           ))}
         </Select>
       </FormControl>
 
-      {/* Комплектация */}
+      {/* Комплектация (мультивыбор) */}
       <FormControl fullWidth>
-        <InputLabel id="complectation-label">Комплектация</InputLabel>
+        <InputLabel>Комплектация</InputLabel>
         <Select
-          labelId="complectation-label"
-          id="complectation-select"
-          disabled={!values["Серия"]}
-          value={values["Комплектация"] || ""}
-          onChange={(e) => handleChange(e, "Комплектация")}
+          multiple
+          value={
+            Array.isArray(values["Комплектация"])
+              ? (values["Комплектация"] as string[])
+              : []
+          }
+          onChange={(e) => handleMultiChange(e, "Комплектация")}
+          renderValue={(selected) =>
+            (selected as string[])
+              .map((v) => {
+                const it = complectation.find((x) => String(x.id) === v);
+                return it?.translated || it?.name || v;
+              })
+              .join(", ")
+          }
           label="Комплектация"
-          sx={{ borderRadius: "16px" }}
+          MenuProps={menuProps}
+          sx={{ borderRadius: 2 }}
         >
-          {complectation.map((item) => (
-            <MenuItem key={item.id} value={String(item.id)}>
-              {item.translated || item.name}
+          {complectation.map((i) => (
+            <MenuItem key={i.id} value={String(i.id)}>
+              {i.translated || i.name}
             </MenuItem>
           ))}
         </Select>
@@ -478,6 +417,7 @@ export default function FilterComponent() {
           value={values["Двигатель"] || ""}
           onChange={(e) => handleChange(e, "Двигатель")}
           label="Двигатель"
+          MenuProps={menuProps}
           sx={{ borderRadius: "16px" }}
         >
           {engine.map((item) => (
@@ -488,7 +428,7 @@ export default function FilterComponent() {
         </Select>
       </FormControl>
 
-      {/* Тип привода (новое поле) */}
+      {/* Трансмиссия */}
       <FormControl fullWidth>
         <InputLabel id="drive-label">Трансмиссия</InputLabel>
         <Select
@@ -497,6 +437,7 @@ export default function FilterComponent() {
           value={values["Тип привода"] || ""}
           onChange={(e) => handleChange(e, "Тип привода")}
           label="Тип привода"
+          MenuProps={menuProps}
           sx={{ borderRadius: "16px" }}
         >
           {driveType.map((item) => (
@@ -516,6 +457,7 @@ export default function FilterComponent() {
           value={values["Цвет кузова"] || ""}
           onChange={(e) => handleChange(e, "Цвет кузова")}
           label="Цвет кузова"
+          MenuProps={menuProps}
           sx={{ borderRadius: "16px" }}
         >
           {color.map((item) => (
@@ -544,7 +486,7 @@ export default function FilterComponent() {
           type="number"
           fullWidth
           value={values["Пробег до (км)"] || ""}
-          onChange={(e) => handleInputChange(e, "Пробег до (км)")}
+          onChange={(e) => handleInputChange(e, "Пробегдо (км)")}
           sx={{ borderRadius: "16px" }}
           InputLabelProps={{ shrink: true }}
         />
@@ -578,17 +520,24 @@ export default function FilterComponent() {
       <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
         <TextField
           label="Дата выпуска от"
-          value={values["date_release_from"] || ""}
+          value={
+            values["date_release_from"]
+              ? formatMonthYear(values["date_release_from"] as string)
+              : ""
+          }
           fullWidth
           onFocus={() => setShowWheelFrom(true)}
           sx={{ borderRadius: "16px" }}
           InputLabelProps={{ shrink: true }}
           inputProps={{ readOnly: true }}
         />
-
         <TextField
           label="Дата выпуска до"
-          value={values["date_release_defor"] || ""}
+          value={
+            values["date_release_defore"]
+              ? formatMonthYear(values["date_release_defore"] as string)
+              : ""
+          }
           fullWidth
           onFocus={() => setShowWheelTo(true)}
           sx={{ borderRadius: "16px" }}
@@ -614,7 +563,10 @@ export default function FilterComponent() {
       {showWheelFrom && (
         <WheelDatePicker
           onChange={(dateStr) => {
-            setValues((prev) => ({ ...prev, date_release_from: dateStr }));
+            setValues((prev) => ({
+              ...prev,
+              date_release_from: dateStr,
+            }));
             setShowWheelFrom(false);
           }}
           onCancel={() => setShowWheelFrom(false)}
@@ -623,7 +575,10 @@ export default function FilterComponent() {
       {showWheelTo && (
         <WheelDatePicker
           onChange={(dateStr) => {
-            setValues((prev) => ({ ...prev, date_release_defor: dateStr }));
+            setValues((prev) => ({
+              ...prev,
+              date_release_defore: dateStr,
+            }));
             setShowWheelTo(false);
           }}
           onCancel={() => setShowWheelTo(false)}
