@@ -35,7 +35,7 @@ interface IRequest {
   price_from: number;
   price_defore: number;
   date_release_from: string;
-  date_release_defor: string;
+  date_release_defore: string;
 }
 
 function HomePage() {
@@ -200,8 +200,8 @@ function HomePage() {
                           ? formatMonthYear(request.date_release_from)
                           : "N/A"}{" "}
                         —{" "}
-                        {request.date_release_defor
-                          ? formatMonthYear(request.date_release_defor)
+                        {request.date_release_defore
+                          ? formatMonthYear(request.date_release_defore)
                           : formatMonthYear(new Date().toISOString())}
                       </Typography>
                       <Typography

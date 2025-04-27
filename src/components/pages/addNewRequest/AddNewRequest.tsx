@@ -324,7 +324,7 @@ export default function FilterComponent() {
       {/* Производитель */}
       <FormControl fullWidth required>
         <InputLabel>Производитель</InputLabel>
-        <Select
+        <Select<string>
           value={(values["Производитель"] as string) || ""}
           onChange={(e) => handleChange(e, "Производитель")}
           label="Производитель"
@@ -342,7 +342,7 @@ export default function FilterComponent() {
       {/* Модель */}
       <FormControl fullWidth required>
         <InputLabel>Модель</InputLabel>
-        <Select
+        <Select<string>
           value={(values["Модель"] as string) || ""}
           onChange={(e) => handleChange(e, "Модель")}
           disabled={!values["Производитель"]}
@@ -358,10 +358,10 @@ export default function FilterComponent() {
         </Select>
       </FormControl>
 
-      {/* Серия */}
+      {/* Модельный год */}
       <FormControl fullWidth required>
         <InputLabel>Модельный год</InputLabel>
-        <Select
+        <Select<string>
           value={(values["Серия"] as string) || ""}
           onChange={(e) => handleChange(e, "Серия")}
           disabled={!values["Модель"]}
@@ -377,10 +377,10 @@ export default function FilterComponent() {
         </Select>
       </FormControl>
 
-      {/* Комплектация (мультивыбор) */}
+      {/* Комплектация */}
       <FormControl fullWidth>
         <InputLabel>Комплектация</InputLabel>
-        <Select
+        <Select<string[]>
           multiple
           value={
             Array.isArray(values["Комплектация"])
@@ -411,14 +411,13 @@ export default function FilterComponent() {
       {/* Двигатель */}
       <FormControl fullWidth>
         <InputLabel id="engine-label">Двигатель</InputLabel>
-        <Select
+        <Select<string>
           labelId="engine-label"
-          id="engine-select"
-          value={values["Двигатель"] || ""}
+          value={(values["Двигатель"] as string) || ""}
           onChange={(e) => handleChange(e, "Двигатель")}
           label="Двигатель"
           MenuProps={menuProps}
-          sx={{ borderRadius: "16px" }}
+          sx={{ borderRadius: 2 }}
         >
           {engine.map((item) => (
             <MenuItem key={item.id} value={String(item.id)}>
@@ -431,14 +430,13 @@ export default function FilterComponent() {
       {/* Трансмиссия */}
       <FormControl fullWidth>
         <InputLabel id="drive-label">Трансмиссия</InputLabel>
-        <Select
+        <Select<string>
           labelId="drive-label"
-          id="drive-select"
-          value={values["Тип привода"] || ""}
+          value={(values["Тип привода"] as string) || ""}
           onChange={(e) => handleChange(e, "Тип привода")}
           label="Тип привода"
           MenuProps={menuProps}
-          sx={{ borderRadius: "16px" }}
+          sx={{ borderRadius: 2 }}
         >
           {driveType.map((item) => (
             <MenuItem key={item.id} value={String(item.id)}>
@@ -451,14 +449,13 @@ export default function FilterComponent() {
       {/* Цвет кузова */}
       <FormControl fullWidth>
         <InputLabel id="color-label">Цвет кузова</InputLabel>
-        <Select
+        <Select<string>
           labelId="color-label"
-          id="color-select"
-          value={values["Цвет кузова"] || ""}
+          value={(values["Цвет кузова"] as string) || ""}
           onChange={(e) => handleChange(e, "Цвет кузова")}
           label="Цвет кузова"
           MenuProps={menuProps}
-          sx={{ borderRadius: "16px" }}
+          sx={{ borderRadius: 2 }}
         >
           {color.map((item) => (
             <MenuItem key={item.id} value={String(item.id)}>
@@ -468,50 +465,40 @@ export default function FilterComponent() {
         </Select>
       </FormControl>
 
-      {/* Пробег от/до */}
+      {/* Пробег от/до и Цена от/до */}
       <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
         <TextField
-          id="mileage-from"
           label="Пробег от (км)"
           type="number"
           fullWidth
           value={values["Пробег от (км)"] || ""}
           onChange={(e) => handleInputChange(e, "Пробег от (км)")}
-          sx={{ borderRadius: "16px" }}
           InputLabelProps={{ shrink: true }}
         />
         <TextField
-          id="mileage-to"
           label="Пробег до (км)"
           type="number"
           fullWidth
           value={values["Пробег до (км)"] || ""}
-          onChange={(e) => handleInputChange(e, "Пробегдо (км)")}
-          sx={{ borderRadius: "16px" }}
+          onChange={(e) => handleInputChange(e, "Пробег до (км)")}
           InputLabelProps={{ shrink: true }}
         />
       </Box>
-
-      {/* Цена от/до */}
       <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
         <TextField
-          id="price-from"
           label="Цена от ₩"
           type="number"
           fullWidth
           value={values["Цена от ₩"] || ""}
           onChange={(e) => handleInputChange(e, "Цена от ₩")}
-          sx={{ borderRadius: "16px" }}
           InputLabelProps={{ shrink: true }}
         />
         <TextField
-          id="price-to"
           label="Цена до ₩"
           type="number"
           fullWidth
           value={values["Цена до ₩"] || ""}
           onChange={(e) => handleInputChange(e, "Цена до ₩")}
-          sx={{ borderRadius: "16px" }}
           InputLabelProps={{ shrink: true }}
         />
       </Box>
@@ -527,7 +514,6 @@ export default function FilterComponent() {
           }
           fullWidth
           onFocus={() => setShowWheelFrom(true)}
-          sx={{ borderRadius: "16px" }}
           InputLabelProps={{ shrink: true }}
           inputProps={{ readOnly: true }}
         />
@@ -540,12 +526,12 @@ export default function FilterComponent() {
           }
           fullWidth
           onFocus={() => setShowWheelTo(true)}
-          sx={{ borderRadius: "16px" }}
           InputLabelProps={{ shrink: true }}
           inputProps={{ readOnly: true }}
         />
       </Box>
 
+      {/* Кнопка Сохранить */}
       <Button
         variant="contained"
         fullWidth
@@ -560,13 +546,11 @@ export default function FilterComponent() {
         Сохранить
       </Button>
 
+      {/* Колёса выбора дат */}
       {showWheelFrom && (
         <WheelDatePicker
           onChange={(dateStr) => {
-            setValues((prev) => ({
-              ...prev,
-              date_release_from: dateStr,
-            }));
+            setValues((prev) => ({ ...prev, date_release_from: dateStr }));
             setShowWheelFrom(false);
           }}
           onCancel={() => setShowWheelFrom(false)}
@@ -575,10 +559,7 @@ export default function FilterComponent() {
       {showWheelTo && (
         <WheelDatePicker
           onChange={(dateStr) => {
-            setValues((prev) => ({
-              ...prev,
-              date_release_defore: dateStr,
-            }));
+            setValues((prev) => ({ ...prev, date_release_defore: dateStr }));
             setShowWheelTo(false);
           }}
           onCancel={() => setShowWheelTo(false)}
