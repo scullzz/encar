@@ -29,7 +29,7 @@ interface IReferenceItem {
 const menuProps = {
   PaperProps: {
     style: {
-      maxHeight: 200,
+      maxHeight: 350,
       width: 240,
     },
   },
